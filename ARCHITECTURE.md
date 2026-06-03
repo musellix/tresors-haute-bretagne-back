@@ -1,76 +1,67 @@
-# Architecture par modules
+# Architecture par modules (Domain-Driven)
 
-## Structure
+## Structure - Option C : DTOs à côté des entités
 
 Le projet est organisé par modules (domaines) plutôt que par couches techniques.
+**Chaque DTO est placé directement avec son entité**, à plat (pas de sous-dossier `dto/`).
 
 ```
 com.tresorshautebretagne/
 │
 ├── treasureHunt/                   Module Chasse au trésor
 │   ├── TreasureHunt.java
+│   ├── TreasureHuntDTO.java        ← DTO à côté
 │   ├── TreasureHuntRepository.java
 │   ├── TreasureHuntService.java
 │   ├── TreasureHuntController.java
 │   │
 │   ├── step/                       Entité secondaire
 │   │   ├── Step.java
+│   │   ├── StepDTO.java            ← DTO à côté
 │   │   └── StepRepository.java
 │   │
 │   ├── dialogue/                   Entité secondaire
 │   │   ├── Dialogue.java
+│   │   ├── DialogueDTO.java        ← DTO à côté
 │   │   └── DialogueRepository.java
 │   │
-│   ├── question/                   Entité secondaire
-│   │   ├── Question.java
-│   │   └── QuestionRepository.java
-│   │
-│   └── dto/                        DTOs du module
-│       ├── TreasureHuntDTO.java
-│       ├── StepDTO.java
-│       ├── DialogueDTO.java
-│       └── QuestionDTO.java
+│   └── question/                   Entité secondaire
+│       ├── Question.java
+│       ├── QuestionDTO.java        ← DTO à côté
+│       └── QuestionRepository.java
 │
 ├── korrigan/                       Module Korrigan
 │   ├── Korrigan.java
+│   ├── KorriganDTO.java            ← DTO à côté
 │   ├── KorriganRepository.java
-│   ├── KorriganController.java
-│   │
-│   └── dto/
-│       └── KorriganDTO.java
+│   └── KorriganController.java
 │
 ├── theme/                          Module Thème
 │   ├── Theme.java
+│   ├── ThemeDTO.java               ← DTO à côté
 │   ├── ThemeRepository.java
-│   ├── ThemeController.java
-│   │
-│   └── dto/
-│       └── ThemeDTO.java
+│   └── ThemeController.java
 │
 ├── user/                           Module Utilisateur
 │   ├── User.java
+│   ├── UserDTO.java                ← DTO à côté
 │   ├── UserRepository.java
-│   ├── UserController.java
-│   │
-│   └── dto/
-│       └── UserDTO.java
+│   └── UserController.java
 │
 ├── userProgress/                   Module Progression utilisateur
 │   ├── UserProgress.java
+│   ├── UserProgressDTO.java        ← DTO à côté
+│   ├── AnswerSubmitDTO.java        ← DTO à côté
+│   ├── AnswerFeedbackDTO.java      ← DTO à côté
+│   ├── TreasureCoordinatesDTO.java ← DTO à côté
 │   ├── UserProgressRepository.java
 │   ├── UserProgressService.java
 │   ├── UserProgressController.java
 │   │
-│   ├── userAnswer/                 Entité secondaire
-│   │   ├── UserAnswer.java
-│   │   └── UserAnswerRepository.java
-│   │
-│   └── dto/
-│       ├── UserProgressDTO.java
-│       ├── UserAnswerDTO.java
-│       ├── AnswerSubmitDTO.java
-│       ├── AnswerFeedbackDTO.java
-│       └── TreasureCoordinatesDTO.java
+│   └── userAnswer/                 Entité secondaire
+│       ├── UserAnswer.java
+│       ├── UserAnswerDTO.java      ← DTO à côté
+│       └── UserAnswerRepository.java
 │
 └── shared/                         Services partagés
     └── service/
