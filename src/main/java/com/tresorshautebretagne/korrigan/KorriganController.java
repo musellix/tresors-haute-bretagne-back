@@ -1,6 +1,6 @@
 package com.tresorshautebretagne.korrigan;
 
-import com.tresorshautebretagne.korrigan.dto.KorriganDTO;
+import com.tresorshautebretagne.korrigan.KorriganDTO;
 import com.tresorshautebretagne.theme.ThemeController;
 import com.tresorshautebretagne.theme.dto.ThemeDTO;
 import com.tresorshautebretagne.theme.ThemeRepository;

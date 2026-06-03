@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.dto;
+package com.tresorshautebretagne.treasureHunt.question;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,5 +13,4 @@ public class QuestionDTO {
     private String questionText;
     private String questionType;
     private String explanation;
-    // correctAnswer is NOT sent to frontend
 }

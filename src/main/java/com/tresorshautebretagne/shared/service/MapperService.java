@@ -1,19 +1,22 @@
 package com.tresorshautebretagne.shared.service;
 
-import com.tresorshautebretagne.treasureHunt.dto.*;
+import com.tresorshautebretagne.treasureHunt.TreasureHuntDTO;
 import com.tresorshautebretagne.treasureHunt.step.Step;
+import com.tresorshautebretagne.treasureHunt.step.StepDTO;
 import com.tresorshautebretagne.treasureHunt.dialogue.Dialogue;
+import com.tresorshautebretagne.treasureHunt.dialogue.DialogueDTO;
 import com.tresorshautebretagne.treasureHunt.question.Question;
+import com.tresorshautebretagne.treasureHunt.question.QuestionDTO;
 import com.tresorshautebretagne.korrigan.Korrigan;
-import com.tresorshautebretagne.korrigan.dto.KorriganDTO;
+import com.tresorshautebretagne.korrigan.KorriganDTO;
 import com.tresorshautebretagne.theme.Theme;
-import com.tresorshautebretagne.theme.dto.ThemeDTO;
+import com.tresorshautebretagne.theme.ThemeDTO;
 import com.tresorshautebretagne.user.User;
-import com.tresorshautebretagne.user.dto.UserDTO;
+import com.tresorshautebretagne.user.UserDTO;
 import com.tresorshautebretagne.userProgress.UserProgress;
-import com.tresorshautebretagne.userProgress.dto.UserProgressDTO;
+import com.tresorshautebretagne.userProgress.UserProgressDTO;
 import com.tresorshautebretagne.userProgress.userAnswer.UserAnswer;
-import com.tresorshautebretagne.userProgress.dto.UserAnswerDTO;
+import com.tresorshautebretagne.userProgress.userAnswer.UserAnswerDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;

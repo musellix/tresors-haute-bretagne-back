@@ -1,6 +1,5 @@
 package com.tresorshautebretagne.userProgress;
 
-import com.tresorshautebretagne.userProgress.dto.*;
 import com.tresorshautebretagne.treasureHunt.question.Question;
 import com.tresorshautebretagne.treasureHunt.question.QuestionRepository;
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;

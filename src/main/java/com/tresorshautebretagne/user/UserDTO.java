@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.dto;
+package com.tresorshautebretagne.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

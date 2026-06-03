@@ -1,6 +1,6 @@
 package com.tresorshautebretagne.theme;
 
-import com.tresorshautebretagne.theme.dto.ThemeDTO;
+import com.tresorshautebretagne.theme.ThemeDTO;
 import com.tresorshautebretagne.korrigan.KorriganRepository;
 import com.tresorshautebretagne.shared.service.MapperService;
 import lombok.RequiredArgsConstructor;

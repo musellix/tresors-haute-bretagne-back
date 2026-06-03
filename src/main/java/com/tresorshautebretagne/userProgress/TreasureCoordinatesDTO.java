@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.userProgress.dto;
+package com.tresorshautebretagne.userProgress;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

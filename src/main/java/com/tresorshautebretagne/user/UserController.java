@@ -1,6 +1,6 @@
 package com.tresorshautebretagne.user;
 
-import com.tresorshautebretagne.user.dto.UserDTO;
+import com.tresorshautebretagne.user.UserDTO;
 import com.tresorshautebretagne.shared.service.MapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

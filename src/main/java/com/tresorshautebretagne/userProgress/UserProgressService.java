@@ -1,6 +1,5 @@
 package com.tresorshautebretagne.userProgress;
 
-import com.tresorshautebretagne.userProgress.dto.*;
 import com.tresorshautebretagne.userProgress.userAnswer.UserAnswer;
 import com.tresorshautebretagne.userProgress.userAnswer.UserAnswerRepository;
 import com.tresorshautebretagne.treasureHunt.question.Question;

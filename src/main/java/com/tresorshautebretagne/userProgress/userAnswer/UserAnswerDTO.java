@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.dto;
+package com.tresorshautebretagne.userProgress.userAnswer;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnswerSubmitDTO {
+public class UserAnswerDTO {
+    private Long id;
     private Long questionId;
     private String answer;
+    private Boolean isCorrect;
 }

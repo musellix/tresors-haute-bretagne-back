@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.treasureHunt.dto;
+package com.tresorshautebretagne.treasureHunt.dialogue;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,5 +12,5 @@ public class DialogueDTO {
     private Integer dialogueOrder;
     private String text;
     private String audioUrl;
-    private Object korrigan; // KorriganDTO
+    private Object korrigan;
 }

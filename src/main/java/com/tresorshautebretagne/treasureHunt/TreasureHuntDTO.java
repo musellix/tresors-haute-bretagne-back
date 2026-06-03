@@ -1,5 +1,6 @@
-package com.tresorshautebretagne.dto;
+package com.tresorshautebretagne.treasureHunt;
 
+import com.tresorshautebretagne.treasureHunt.step.StepDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ public class TreasureHuntDTO {
     private Long id;
     private String title;
     private String description;
-    private ThemeDTO theme;
+    private Object theme;
     private Double finalLatitude;
     private Double finalLongitude;
     private String treasureImageUrl;

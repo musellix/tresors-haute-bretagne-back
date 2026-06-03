@@ -1,4 +1,4 @@
-package com.tresorshautebretagne.theme.dto;
+package com.tresorshautebretagne.theme;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,5 +13,5 @@ public class ThemeDTO {
     private String description;
     private String imageUrl;
     private Long korriganId;
-    private Object korrigan; // KorriganDTO
+    private Object korrigan;
 }

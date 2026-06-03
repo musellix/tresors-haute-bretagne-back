@@ -1,5 +1,7 @@
-package com.tresorshautebretagne.dto;
+package com.tresorshautebretagne.treasureHunt.step;
 
+import com.tresorshautebretagne.treasureHunt.dialogue.DialogueDTO;
+import com.tresorshautebretagne.treasureHunt.question.QuestionDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
