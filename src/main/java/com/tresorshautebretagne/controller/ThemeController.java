@@ -1,0 +1,54 @@
+package com.tresorshautebretagne.controller;
+
+import com.tresorshautebretagne.dto.ThemeDTO;
+import com.tresorshautebretagne.entity.Theme;
+import com.tresorshautebretagne.repository.ThemeRepository;
+import com.tresorshautebretagne.repository.KorriganRepository;
+import com.tresorshautebretagne.service.MapperService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/themes")
+@RequiredArgsConstructor
+public class ThemeController {
+
+    private final ThemeRepository themeRepository;
+    private final KorriganRepository korriganRepository;
+    private final MapperService mapperService;
+
+    @GetMapping
+    public ResponseEntity<List<ThemeDTO>> getAllThemes() {
+        List<ThemeDTO> themes = themeRepository.findAll().stream()
+                .map(mapperService::themeToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(themes);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ThemeDTO> getThemeById(@PathVariable Long id) {
+        Theme theme = themeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Theme not found: " + id));
+        return ResponseEntity.ok(mapperService.themeToDTO(theme));
+    }
+
+    @PostMapping
+    public ResponseEntity<ThemeDTO> createTheme(@RequestBody ThemeDTO themeDTO) {
+        Theme theme = new Theme();
+        theme.setName(themeDTO.getName());
+        theme.setDescription(themeDTO.getDescription());
+        theme.setImageUrl(themeDTO.getImageUrl());
+        
+        if (themeDTO.getKorriganId() != null) {
+            theme.setKorrigan(korriganRepository.findById(themeDTO.getKorriganId())
+                    .orElseThrow(() -> new RuntimeException("Korrigan not found")));
+        }
+        
+        Theme saved = themeRepository.save(theme);
+        return ResponseEntity.ok(mapperService.themeToDTO(saved));
+    }
+}

@@ -1,0 +1,104 @@
+package com.tresorshautebretagne.service;
+
+import com.tresorshautebretagne.dto.*;
+import com.tresorshautebretagne.entity.*;
+import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
+
+@Service
+public class MapperService {
+
+    public ThemeDTO themeToDTO(Theme theme) {
+        ThemeDTO dto = new ThemeDTO();
+        dto.setId(theme.getId());
+        dto.setName(theme.getName());
+        dto.setDescription(theme.getDescription());
+        dto.setImageUrl(theme.getImageUrl());
+        dto.setKorriganId(theme.getKorrigan().getId());
+        dto.setKorrigan(korriganToDTO(theme.getKorrigan()));
+        return dto;
+    }
+
+    public KorriganDTO korriganToDTO(Korrigan korrigan) {
+        KorriganDTO dto = new KorriganDTO();
+        dto.setId(korrigan.getId());
+        dto.setName(korrigan.getName());
+        dto.setDescription(korrigan.getDescription());
+        dto.setImageUrl(korrigan.getImageUrl());
+        return dto;
+    }
+
+    public StepDTO stepToDTO(Step step) {
+        StepDTO dto = new StepDTO();
+        dto.setId(step.getId());
+        dto.setStepOrder(step.getStepOrder());
+        dto.setTitle(step.getTitle());
+        dto.setDescription(step.getDescription());
+        dto.setLatitude(step.getLatitude());
+        dto.setLongitude(step.getLongitude());
+        dto.setRadiusMeters(step.getRadiusMeters());
+        
+        dto.setDialogues(step.getDialogues().stream()
+                .map(this::dialogueToDTO)
+                .collect(Collectors.toList()));
+        
+        dto.setQuestions(step.getQuestions().stream()
+                .map(this::questionToDTO)
+                .collect(Collectors.toList()));
+        
+        return dto;
+    }
+
+    public DialogueDTO dialogueToDTO(Dialogue dialogue) {
+        DialogueDTO dto = new DialogueDTO();
+        dto.setId(dialogue.getId());
+        dto.setDialogueOrder(dialogue.getDialogueOrder());
+        dto.setText(dialogue.getText());
+        dto.setAudioUrl(dialogue.getAudioUrl());
+        dto.setKorrigan(korriganToDTO(dialogue.getKorrigan()));
+        return dto;
+    }
+
+    public QuestionDTO questionToDTO(Question question) {
+        QuestionDTO dto = new QuestionDTO();
+        dto.setId(question.getId());
+        dto.setQuestionOrder(question.getQuestionOrder());
+        dto.setQuestionText(question.getQuestionText());
+        dto.setQuestionType(question.getQuestionType());
+        dto.setExplanation(question.getExplanation());
+        // correctAnswer is NOT sent to client
+        return dto;
+    }
+
+    public UserProgressDTO userProgressToDTO(UserProgress progress) {
+        UserProgressDTO dto = new UserProgressDTO();
+        dto.setId(progress.getId());
+        dto.setUserId(progress.getUser().getId());
+        dto.setTreasureHuntId(progress.getTreasureHunt().getId());
+        dto.setCurrentStep(progress.getCurrentStep());
+        dto.setIsCompleted(progress.getIsCompleted());
+        dto.setIsTreasureUnlocked(progress.getIsTreasureUnlocked());
+        dto.setStartedAt(progress.getStartedAt().toString());
+        dto.setCompletedAt(progress.getCompletedAt() != null ? progress.getCompletedAt().toString() : null);
+        return dto;
+    }
+
+    public UserAnswerDTO userAnswerToDTO(UserAnswer answer) {
+        UserAnswerDTO dto = new UserAnswerDTO();
+        dto.setId(answer.getId());
+        dto.setQuestionId(answer.getQuestion().getId());
+        dto.setAnswer(answer.getAnswer());
+        dto.setIsCorrect(answer.getIsCorrect());
+        return dto;
+    }
+
+    public UserDTO userToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setEmail(user.getEmail());
+        dto.setName(user.getName());
+        dto.setAvatarUrl(user.getAvatarUrl());
+        return dto;
+    }
+}
