@@ -7,22 +7,35 @@ spring:
     username: ${DATABASE_USER:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    initialization-mode: always
   
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  
+  sql:
+    init:
+      mode: always
+      platform: postgresql
+      data-locations: classpath:data.sql
+      encoding: UTF-8
 
 server:
   port: 8080
   servlet:
     context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
 
 logging:
   level:
     root: INFO
     com.tresorshautebretagne: DEBUG
+    org.springframework.web: INFO
