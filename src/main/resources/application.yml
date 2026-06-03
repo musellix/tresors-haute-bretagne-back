@@ -34,6 +34,29 @@ server:
     include-message: always
     include-binding-errors: always
 
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:TresorsHauteBretagne_SecretKey_MustBe32CharsMinimum!2024}
+    expiration: 604800000        # 7 jours
+    refresh-expiration: 7776000000  # 90 jours
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+
 logging:
   level:
     root: INFO

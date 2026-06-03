@@ -82,9 +82,11 @@ CREATE TABLE IF NOT EXISTS questions (
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     avatar_url VARCHAR(500),
+    google_id VARCHAR(255) UNIQUE,
+    email_verified BOOLEAN NOT NULL DEFAULT false,
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
@@ -116,6 +118,27 @@ CREATE TABLE IF NOT EXISTS user_answers (
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+-- Refresh tokens table
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revoked BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Email verification tokens table
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Indexes for better performance

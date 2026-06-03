@@ -20,17 +20,6 @@ public class UserController {
         return ResponseEntity.ok(mapperService.userToDTO(user));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO userDTO) {
-        User user = new User();
-        user.setEmail(userDTO.getEmail());
-        user.setName(userDTO.getName());
-        user.setAvatarUrl(userDTO.getAvatarUrl());
-        
-        User saved = userRepository.save(user);
-        return ResponseEntity.ok(mapperService.userToDTO(saved));
-    }
-
     @GetMapping("/email/{email}")
     public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
         User user = userRepository.findByEmail(email)
