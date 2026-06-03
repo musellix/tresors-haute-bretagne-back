@@ -1,7 +1,7 @@
 package com.tresorshautebretagne.treasureHunt;
 
 import com.tresorshautebretagne.treasureHunt.TreasureHuntDTO;
-import com.tresorshautebretagne.treasureHunt.dto.StepDTO;
+import com.tresorshautebretagne.treasureHunt.step.StepDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

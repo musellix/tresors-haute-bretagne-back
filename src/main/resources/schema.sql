@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS treasure_hunts (
     final_latitude DOUBLE PRECISION NOT NULL,
     final_longitude DOUBLE PRECISION NOT NULL,
     treasure_image_url VARCHAR(500),
+    coordinate_formula VARCHAR(255),
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,

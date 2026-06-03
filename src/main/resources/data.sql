@@ -1,4 +1,4 @@
--- Sample data for testing
+-- Sample data
 
 -- Insert Korrigans (13 total)
 INSERT INTO korrigans (name, description, image_url) VALUES
@@ -34,151 +34,83 @@ INSERT INTO themes (name, description, image_url, korrigan_id) VALUES
     ('Le Monde des Korrigans', 'L''univers complet des créatures magiques', 'https://example.com/theme-korrigans.png', 13)
 ON CONFLICT DO NOTHING;
 
--- Insert Treasure Hunts (11 regular + 2 quest hunts)
-INSERT INTO treasure_hunts (title, description, theme_id, final_latitude, final_longitude, treasure_image_url, is_active) VALUES
-    ('La Route des Marchands', 'Suivez les pas des anciens marchands bretons', 1, 48.1234, -1.5678, 'https://example.com/treasure-commerce.png', true),
-    ('Les Chemins Verts', 'Parcourez les sentiers de la Haute Bretagne', 2, 48.2234, -1.4678, 'https://example.com/treasure-nature.png', true),
-    ('L''Atelier Oublié', 'Retrouvez les secrets des maîtres artisans', 3, 48.3234, -1.3678, 'https://example.com/treasure-arts.png', true),
-    ('Les Écluses du Temps', 'Découvrez l''histoire des voies d''eau', 4, 48.4234, -1.2678, 'https://example.com/treasure-canaux.png', true),
-    ('La Forêt Protégée', 'Explorez la nature sauvage préservée', 5, 48.5234, -1.1678, 'https://example.com/treasure-ecologie.png', true),
-    ('Les Saveurs Cachées', 'Traque les délices gastronomiques', 6, 48.6234, -1.0678, 'https://example.com/treasure-gastronomie.png', true),
-    ('Les Traces du Passé', 'Remontez aux sources de l''histoire bretonne', 7, 48.7234, -0.9678, 'https://example.com/treasure-histoire.png', true),
-    ('L''Appel des Vagues', 'Découvrez les secrets de la côte atlantique', 8, 48.8234, -0.8678, 'https://example.com/treasure-mer.png', true),
-    ('Cité Urbaine', 'Les richesses du patrimoine citadin', 9, 48.9234, -0.7678, 'https://example.com/treasure-urbain.png', true),
-    ('L''Aventure en Mouvement', 'Défi sportif et découverte', 10, 47.0234, -1.6678, 'https://example.com/treasure-sport.png', true),
-    ('Secrets de Pierre', 'Les énigmes des mégalithes anciens', 11, 47.1234, -1.5678, 'https://example.com/treasure-megalithe.png', true),
-    ('Quête de Darkann', 'Mission spéciale roublarde', 12, 47.2234, -1.4678, 'https://example.com/treasure-darkann.png', true),
-    ('Monde de Korry Gan', 'Quête finale généraliste', 13, 47.3234, -1.3678, 'https://example.com/treasure-korrygan.png', true)
+-- =============================================================
+-- Chasse au trésor réelle : « Au bonheur des dames » (Langon)
+-- Thème : Histoire (theme_id 7) - Korrigans : Queen Aman (7) & Korry Gan (13)
+-- Type : multicache - Difficulté 2/5 - Durée 1 h
+-- =============================================================
+
+-- Insert Treasure Hunt (1)
+INSERT INTO treasure_hunts (title, description, theme_id, final_latitude, final_longitude, treasure_image_url, coordinate_formula, is_active) VALUES
+    ('Au bonheur des dames', 'Direction Langon, au sud de l''Ille-et-Vilaine en Pays de Redon, à la rencontre des femmes qui ont marqué l''histoire de ce charmant bourg labellisé Commune du Patrimoine Rural de Bretagne. Une multicache (difficulté 2/5, environ 1 h) sur les traces d''Agathe, des lavandières et des Demoiselles de pierre.', 7, 47.720933, -1.849667, NULL, 'N 47°4(B).2(D)(Bx2)'' / W 1°(D)0.(C)(A+1)0''', true)
 ON CONFLICT DO NOTHING;
 
--- Insert Steps (2 steps per treasure hunt, 26 total)
+-- Insert Steps (5)
 INSERT INTO steps (treasure_hunt_id, step_order, title, description, latitude, longitude, radius_meters) VALUES
-    -- Hunt 1: Commerce
-    (1, 1, 'La Vieille Boutique', 'Retrouvez la plus ancienne boutique commerçante', 48.1111, -1.5111, 100),
-    (1, 2, 'La Place du Marché', 'Le cœur battant du commerce local', 48.1222, -1.5222, 100),
-    -- Hunt 2: Nature
-    (2, 1, 'La Clairière Verte', 'Une clairière préservée de la nature', 48.2111, -1.4111, 100),
-    (2, 2, 'La Source Cristalline', 'L''eau pure de la Bretagne', 48.2222, -1.4222, 100),
-    -- Hunt 3: Arts
-    (3, 1, 'L''Atelier du Potier', 'Le lieu de création des artisans', 48.3111, -1.3111, 100),
-    (3, 2, 'La Galerie des Maîtres', 'Les œuvres des grands créateurs', 48.3222, -1.3222, 100),
-    -- Hunt 4: Canaux
-    (4, 1, 'L''Écluse Principale', 'Le mécanisme ancestral', 48.4111, -1.2111, 150),
-    (4, 2, 'Le Chemin de Halage', 'La voie des anciens mariniers', 48.4222, -1.2222, 150),
-    -- Hunt 5: Écologie
-    (5, 1, 'La Réserve Naturelle', 'Zone protégée avec faune et flore', 48.5111, -1.1111, 100),
-    (5, 2, 'L''Observatoire Écologique', 'Point d''observation privilégié', 48.5222, -1.1222, 100),
-    -- Hunt 6: Gastronomie
-    (6, 1, 'La Crêperie Traditionnelle', 'Les secrets de la vraie crêpe', 48.6111, -1.0111, 100),
-    (6, 2, 'Le Marché aux Fruits de Mer', 'Les délices de la côte', 48.6222, -1.0222, 100),
-    -- Hunt 7: Histoire
-    (7, 1, 'Le Château Historique', 'Forteresse du Moyen Âge', 48.7111, -0.9111, 200),
-    (7, 2, 'La Chapelle Ancestrale', 'Sanctuaire des générations', 48.7222, -0.9222, 150),
-    -- Hunt 8: Mer
-    (8, 1, 'La Pointe du Grouin', 'Panorama côtier spectaculaire', 48.8111, -0.8111, 150),
-    (8, 2, 'Le Port de Cancale', 'Les huîtres et la vie maritime', 48.8222, -0.8222, 100),
-    -- Hunt 9: Urbain
-    (9, 1, 'Les Rues Anciennes', 'Patrimoine urbain médiéval', 48.9111, -0.7111, 100),
-    (9, 2, 'La Gargouille Mystérieuse', 'Secret architectural', 48.9222, -0.7222, 100),
-    -- Hunt 10: Sport
-    (10, 1, 'La Digue du Sillon', 'Parcours côtier sportif', 47.0111, -1.6111, 150),
-    (10, 2, 'Le Sentier de l''Aventure', 'Défi physique bucolique', 47.0222, -1.6222, 100),
-    -- Hunt 11: Mégalithe
-    (11, 1, 'Le Menhir Principal', 'Monument de pierre ancestral', 47.1111, -1.5111, 200),
-    (11, 2, 'Le Dolmen Sacré', 'Tombeau des anciens', 47.1222, -1.5222, 200),
-    -- Hunt 12: Darkann (Quête)
-    (12, 1, 'Énigme 1 de Darkann', 'Première épreuve roublarde', 47.2111, -1.4111, 150),
-    (12, 2, 'Énigme 2 de Darkann', 'Deuxième épreuve complexe', 47.2222, -1.4222, 150),
-    -- Hunt 13: Korry Gan (Quête)
-    (13, 1, 'Convergence Finale', 'Rassemblement des pouvoirs', 47.3111, -1.3111, 150),
-    (13, 2, 'Le Secret des Korrigans', 'Révélation ultime', 47.3222, -1.3222, 150)
+    (1, 1, 'Départ', 'Garez-vous sur le petit parking près de l''église : il vous permettra de rejoindre facilement votre véhicule à la fin du circuit. C''est le point de départ du parcours.', 47.720050, -1.848883, 40),
+    (1, 2, 'Agathe, Pierre et Paul', 'La chapelle gallo-romaine Sainte-Agathe et, juste de l''autre côté de la rue, l''église romane Saint-Pierre-et-Saint-Paul.', 47.720400, -1.848933, 40),
+    (1, 3, 'Le lavoir', 'Le lavoir communal, rue Mondésir, où se retrouvaient autrefois les lavandières de Langon.', 47.718983, -1.849483, 30),
+    (1, 4, 'Les Demoiselles', 'Les vestiges d''un alignement mégalithique d''une trentaine de menhirs, surnommé « les Demoiselles ».', 47.720800, -1.854483, 60),
+    (1, 5, 'La Cache', 'Empruntez le petit chemin de traverse depuis ce jalon, puis prenez à droite. Le trésor est en bois, près de la mare. Soyez discrets pour le découvrir et remettez-le bien en place !', 47.721650, -1.852283, 30)
 ON CONFLICT DO NOTHING;
 
--- Insert Dialogues for all steps
+-- Insert Dialogues (par étape, dans l'ordre du récit)
 INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, audio_url) VALUES
-    (1, 1, 'Bienvenue marchand! Tu as trouvé la vieille boutique. Es-tu prêt pour l''épreuve commerciale?', 1, NULL),
-    (2, 1, 'Bravo! Te voilà à la Place du Marché, le cœur de nos échanges.', 1, NULL),
-    (3, 2, 'Ah, te voilà dans la Clairière Verte! La nature t''accueille.', 1, NULL),
-    (4, 2, 'La Source Cristalline brille! Son eau pure recèle un secret...', 1, NULL),
-    (5, 3, 'Bienvenue à l''Atelier du Potier! Observer bien les techniques.', 1, NULL),
-    (6, 3, 'Les Maîtres ont créé de magnifiques œuvres. Peux-tu les reconnaître?', 1, NULL),
-    (7, 4, 'Voici l''Écluse Principale! Un mécanisme séculaire t''attend.', 1, NULL),
-    (8, 4, 'Les mariniers ont navigué par ces chemins. Connais-tu leur histoire?', 1, NULL),
-    (9, 5, 'Bienvenue dans la Réserve Naturelle! Observe la faune et la flore.', 1, NULL),
-    (10, 5, 'L''Observatoire Écologique révèle les secrets de la nature.', 1, NULL),
-    (11, 6, 'Ah, un gourmet! La Crêperie Traditionnelle t''attend.', 1, NULL),
-    (12, 6, 'Les fruits de mer de nos côtes sont savoureux. Connais-tu leurs noms?', 1, NULL),
-    (13, 7, 'Bienvenue au Château Historique! Des générations l''ont habité.', 1, NULL),
-    (14, 7, 'La Chapelle Ancestrale est le berceau de notre histoire. Écoute le passé...', 1, NULL),
-    (15, 8, 'Ah, te voilà à la Pointe du Grouin! Le spectacle des vagues t''impressionne?', 1, NULL),
-    (16, 8, 'Cancale, capitale mondiale des huîtres! Sauras-tu résoudre mes énigmes?', 1, NULL),
-    (17, 9, 'Bienvenue dans les rues anciennes du patrimoine urbain!', 1, NULL),
-    (18, 9, 'La Gargouille Mystérieuse guarde ses secrets...', 1, NULL),
-    (19, 10, 'Bienvenue sur la Digue du Sillon! Êtes-vous prêts pour l''aventure?', 1, NULL),
-    (20, 10, 'Le Sentier de l''Aventure teste vos forces et votre courage!', 1, NULL),
-    (21, 11, 'Voici le Menhir Principal! Monolithe des anciens temps!', 1, NULL),
-    (22, 11, 'Le Dolmen Sacré renferme les mystères du passé...', 1, NULL),
-    (23, 12, 'Je suis Darkann! Acceptes-tu cette première énigme roublarde?', 1, NULL),
-    (24, 12, 'Deuxième épreuve : as-tu l''esprit assez vif pour me suivre?', 1, NULL),
-    (25, 13, 'Korry Gan t''accueille! Tous les chemins convergent ici!', 1, NULL),
-    (26, 13, 'Tu as traversé tous les mondes! Découvre maintenant le secret des Korrigans!', 1, NULL)
+    -- Étape 1 : Départ
+    (1, 7, 'Bonjour tout le monde ! Pour cette chasse aux trésors, direction Langon, commune située au sud de l''Ille-et-Vilaine en Pays de Redon… Là-bas, pas de château fort ni de bataille à vous raconter, mais plutôt des histoires de femmes à travers des monuments et des sites qui évoquent la vie et le passé de ce charmant petit bourg labellisé Commune du Patrimoine Rural de Bretagne.', 1, NULL),
+    (1, 13, 'Un cache féministe peut-être ?', 2, NULL),
+    (1, 7, 'Pas forcément, mais bien souvent on oublie le rôle joué par les femmes au cours de l''histoire ou même tout simplement dans la vie quotidienne. Si tu veux en savoir plus, tu n''as qu''à me suivre…', 3, NULL),
+    (1, 13, 'Le mieux est de vous garer sur le petit parking près de l''église. Il vous permettra de rejoindre facilement votre véhicule à la fin du circuit. Dis-moi, Queen Aman, quelle est la première femme que nous allons rencontrer ?', 4, NULL),
+    (1, 7, 'Elle se prénomme Agathe… et elle sera accompagnée.', 5, NULL),
+    (1, 13, 'Ah, zut !', 6, NULL),
+    -- Étape 2 : Agathe, Pierre et Paul
+    (2, 7, 'Mon cher Korry Gan, ici tu risques fort de te casser le nez. Agathe est le nom donné à cette jolie petite chapelle située juste de l''autre côté de la rue.', 1, NULL),
+    (2, 13, 'La chapelle Ste Agathe… on dirait une église miniature !', 2, NULL),
+    (2, 7, 'Mieux que cela, son passé remonte jusqu''à l''époque gallo-romaine. C''est l''un des rares bâtiments gallo-romains subsistant en Bretagne. Cette chapelle affiche 18 siècles d''histoire au clocheton. Elle fut successivement thermes gallo-romains à la fin du IIè siècle, église au Haut-Moyen Âge (VI–VIIè s.) et chapelle funéraire (XIIIème siècle). Véritable petit bijou d''architecture classé Monument Historique depuis la première moitié du XIXè siècle, la chapelle Sainte-Agathe figure parmi les tous premiers monuments classés en France à cette époque.', 3, NULL),
+    (2, 13, 'Elle n''a pas pris une ride !', 4, NULL),
+    (2, 7, 'Elle est placée sous la protection de Ste Agathe, patronne des nourrices. Il faut savoir que Ste Agathe avait été torturée par les Romains, les seins mutilés, puis guérie par St-Pierre qui était apparu dans son cachot. D''après une ancienne tradition, les mères et les nourrices en manque de lait invoquaient Ste Agathe afin de pouvoir allaiter leur enfant. Pour cela, elles devaient effectuer sept fois le tour de la chapelle en priant. Par mimétisme, ce pèlerinage s''est étendu à toutes les femmes ayant des problèmes de santé liés aux seins.', 5, NULL),
+    (2, 13, 'Ah oui ? Comme ce pays a parfois des coutumes bien étranges…', 6, NULL),
+    (2, 7, 'Cette chapelle abrite un véritable trésor dans le cul-de-four de l''abside (un cul-de-four est une voûte en forme de quart de sphère, rappelant la forme du four à pain). Il s''agit d''une fresque gallo-romaine datée de la fin du IIè - début du IIIè siècle, représentant Vénus sortant des eaux.', 7, NULL),
+    (2, 7, 'Direction à présent l''église St-Pierre et St-Paul. Pour cela, il vous suffit de traverser prudemment la route.', 8, NULL),
+    (2, 13, 'Décidément, je ne sais plus à quel saint me vouer !', 9, NULL),
+    (2, 7, 'Observez-la bien ! Elle servira de base à notre prochaine énigme. De construction romane, elle a subi plusieurs transformations parmi lesquelles la construction d''un ensemble de clochetons qui personnalise sa silhouette de manière originale. Cela symbolise le Christ et ses apôtres. Cette église est le seul ensemble roman conservé dans son intégralité en Ille-et-Vilaine. Depuis 2013, cet édifice fait l''objet d''importants travaux de restauration et est malheureusement fermé au public pour l''instant.', 10, NULL),
+    (2, 13, 'Contournez l''église et rendez-vous « rue Mondésir ».', 11, NULL),
+    -- Étape 3 : Le lavoir
+    (3, 13, 'Où sont les femmes, avec leurs gestes pleins de charme, où sont les femmes… ?', 1, NULL),
+    (3, 7, 'Au lavoir… nous avons rendez-vous avec les lavandières et le charme (pas toujours évident) des métiers d''antan. En chemin, vous remarquerez dans l''angle d''un mur une lessiveuse publique. Les lavandières y faisaient bouillir le linge mélangé à des cendres végétales avant de le remonter en brouette (ou camion) jusqu''au lavoir communal pour le rincer.', 2, NULL),
+    (3, 13, 'Faites de même, la brouette en moins.', 3, NULL),
+    (3, 7, 'Le bourg de Langon est adossé au pied d''un coteau alimenté par des sources, d''où la présence de lavoirs et de fontaines sur la commune. À l''origine, le lavoir est une pierre plate ou une simple planche posée au bord d''un cours d''eau, d''une mare ou d''une source, sans abri. À partir du XVIIIè siècle, la pollution due à la révolution industrielle, les épidémies et le besoin d''hygiène conduisent les communes à s''équiper de constructions spécifiques. Enfin, le lavoir joue un rôle éminemment social : les femmes s''y retrouvent chaque semaine pour échanger sur les dernières nouvelles du village, voire de la région.', 4, NULL),
+    (3, 13, 'À défaut de potins et de cancans, on pourrait peut-être se pencher sur une nouvelle énigme ?', 5, NULL),
+    (3, 7, 'La suite du parcours nous fait faire un bond en arrière dans le passé. Prêts pour le voyage ?', 6, NULL),
+    -- Étape 4 : Les Demoiselles
+    (4, 13, 'Empruntez ensuite la rue du Courtiret puis rejoignez le jalon (N 47°43.236'' / W 1°51.160'').', 1, NULL),
+    (4, 7, 'Nous avons rendez-vous avec des Demoiselles un peu particulières…', 2, NULL),
+    (4, 13, 'Moi, je dirais plutôt un peu figées.', 3, NULL),
+    (4, 7, 'Sais-tu seulement pourquoi ? Nous sommes sur les vestiges d''un important alignement mégalithique d''une trentaine de menhirs en quartz blanc, schiste ou grès, appelé « les Demoiselles ». Ce site fait partie d''un vaste ensemble mégalithique s''étendant sur les crêtes du Pays de Redon, dont le point le plus remarquable se situe sur les Landes de Cojoux à Saint-Just.', 4, NULL),
+    (4, 13, 'Le repère de Rouledépec…', 5, NULL),
+    (4, 7, 'Une légende raconte que ce sont des jeunes filles qui ont été transformées en pierre pour avoir dansé sur la lande plutôt que d''aller aux vêpres. En fait, il s''agit d''une histoire créée au XVIIIè siècle par l''église pour lutter contre le paganisme de l''époque.', 6, NULL),
+    (4, 7, '« La femme est l''avenir de l''homme », chantait le poète Aragon. Vous disposez à présent de toutes les réponses aux énigmes grâce à toutes ces dames… Saurez-vous retrouver le trésor ?', 7, NULL),
+    -- Étape 5 : La Cache
+    (5, 13, 'Commencez par emprunter un charmant petit chemin de traverse au jalon (N 47°43.299'' / W 1°51.137''), puis prenez à droite. Nul besoin de détériorer l''environnement, le trésor est forcément là, sous vos yeux. Merci de respecter le site, il est entretenu par la commune de Langon.', 1, NULL),
+    (5, 13, 'Et maintenant, laissez-vous porter par votre instinct pour rejoindre le lieu de la cache. Attention, il faudra être très discrets pour le découvrir et éviter qu''il ne s''évapore… Indication : en bois, près de la mare.', 2, NULL),
+    (5, 7, 'Ce trésor doit impérativement être remis en place tel que vous l''avez trouvé. Une fois la cache découverte, n''oubliez pas de signaler votre passage dans le logbook (on adore vous lire) et de remettre la cache là où vous l''avez trouvée. À bientôt pour de nouvelles aventures !', 3, NULL)
 ON CONFLICT DO NOTHING;
 
--- Insert Questions for all steps (2 questions per step)
+-- Insert Questions (les énigmes du parcours : A, B, C, D)
 INSERT INTO questions (step_id, question_text, correct_answer, explanation, question_order, question_type) VALUES
-    (1, 'En quelle année cette boutique a-t-elle ouvert?', '1850', 'La vieille boutique date du milieu du XIXe siècle!', 1, 'SHORT_TEXT'),
-    (1, 'Quel type de marchandises y était vendu?', '3', 'Tissu, draperie et articles textiles!', 2, 'SHORT_TEXT'),
-    (2, 'Combien de jours par semaine le marché se tenait-il?', '3', 'Le marché avait lieu trois jours par semaine!', 1, 'SHORT_TEXT'),
-    (2, 'Quel était le jour principal du marché?', '5', 'Vendredi, jour des grand marchés!', 2, 'SHORT_TEXT'),
-    (3, 'Quel animal symbolise cette forêt?', '1', 'Le cerf est le roi de cette forêt enchantée!', 1, 'SHORT_TEXT'),
-    (3, 'Combien d''arbres centenaires compte cette clairière?', '12', 'Douze arbres majestueux peuplent ce lieu!', 2, 'SHORT_TEXT'),
-    (4, 'Quelle est la profondeur de la source?', '5', 'La source a une profondeur de 5 mètres!', 1, 'SHORT_TEXT'),
-    (4, 'Quelle est sa température moyenne?', '8', '8 degrés, eau très froide!', 2, 'SHORT_TEXT'),
-    (5, 'Quel est le tour de mains du potier?', '7', 'Le tournage sur roue est son art principal!', 1, 'SHORT_TEXT'),
-    (5, 'En combien de temps se cuit la céramique?', '2', 'Deux heures sont nécessaires pour cuire une pièce!', 2, 'SHORT_TEXT'),
-    (6, 'Combien de maîtres ont signé les œuvres?', '7', 'Sept grands maîtres ont créé ces chefs-d''œuvre!', 1, 'SHORT_TEXT'),
-    (6, 'Quelle technique prédominait?', '4', 'La vitrification et l''émaillage!', 2, 'SHORT_TEXT'),
-    (7, 'En quelle année l''écluse a-t-elle été construite?', '1750', 'L''écluse date de 1750!', 1, 'SHORT_TEXT'),
-    (7, 'Quelle était sa profondeur originelle?', '3', 'Une profondeur de 3 mètres permettait la navigation!', 2, 'SHORT_TEXT'),
-    (8, 'Quel était le chargement principal?', '2', 'L''ardoise était le bien le plus transporté!', 1, 'SHORT_TEXT'),
-    (8, 'Combien de chevaux tiraient les barges?', '6', 'Six chevaux robustes pour chaque barge!', 2, 'SHORT_TEXT'),
-    (9, 'Combien d''espèces protégées vivent ici?', '47', 'La réserve abrite 47 espèces protégées!', 1, 'SHORT_TEXT'),
-    (9, 'Quel oiseau rare peut-on observer?', '2', 'Les aigles pêcheurs habitent ce sanctuaire!', 2, 'SHORT_TEXT'),
-    (10, 'Quelle est la faune principale observée?', '2', 'Les renards et chevreuils sont les habitants principaux!', 1, 'SHORT_TEXT'),
-    (10, 'En quelle année cette réserve a-t-elle été créée?', '1980', 'La réserve date de 1980!', 2, 'SHORT_TEXT'),
-    (11, 'Combien d''ingrédients traditionnels pour une crêpe?', '4', 'Farine, lait, œuf et beurre: les quatre piliers!', 1, 'SHORT_TEXT'),
-    (11, 'Quel est le temps de cuisson classique?', '2', 'Deux minutes pour une crêpe parfaite!', 2, 'SHORT_TEXT'),
-    (12, 'Quel fruit de mer est le plus savoureux?', '1', 'L''huître est la reine de nos côtes!', 1, 'SHORT_TEXT'),
-    (12, 'Combien d''huîtres déguste-t-on en une saison?', '9', 'Neuf tonnes de production annuelle!', 2, 'SHORT_TEXT'),
-    (13, 'En quelle année le château a-t-il été construit?', '1350', 'Le château remonte à 1350!', 1, 'SHORT_TEXT'),
-    (13, 'Combien de tours de défense possède-t-il?', '5', 'Cinq tours impressionnantes le défendaient!', 2, 'SHORT_TEXT'),
-    (14, 'En quelle année la chapelle a-t-elle été fondée?', '1200', 'La chapelle fut fondée au XIIIe siècle!', 1, 'SHORT_TEXT'),
-    (14, 'Quel saint est vénéré dans cette chapelle?', '1', 'Saint Yves est le patron des justes!', 2, 'SHORT_TEXT'),
-    (15, 'Quelle est la hauteur de la Pointe du Grouin?', '40', '40 mètres de falaises majestueuses!', 1, 'SHORT_TEXT'),
-    (15, 'Combien d''espèces marines vivent au pied?', '60', '60 espèces marines différentes!', 2, 'SHORT_TEXT'),
-    (16, 'Quelle est la production annuelle de Cancale?', '5', '5000 tonnes d''huîtres par an!', 1, 'SHORT_TEXT'),
-    (16, 'Depuis combien de siècles cultive-t-on l''huître ici?', '3', 'Trois siècles de tradition!', 2, 'SHORT_TEXT'),
-    (17, 'En quelle année la ville a-t-elle été fortifiée?', '1400', 'Fortifications du XVe siècle!', 1, 'SHORT_TEXT'),
-    (17, 'Combien de portes d''entrée reste-t-il?', '4', 'Quatre portes historiques subsistent!', 2, 'SHORT_TEXT'),
-    (18, 'Combien de gargouilles ornent les bâtiments?', '27', '27 gargouilles symboliques!', 1, 'SHORT_TEXT'),
-    (18, 'Quel était leur rôle principal?', '5', 'Protection et évacuation des eaux!', 2, 'SHORT_TEXT'),
-    (19, 'Quelle est la longueur de la Digue du Sillon?', '4', '4 kilomètres de marche sportive!', 1, 'SHORT_TEXT'),
-    (19, 'Combien de marches d''escaliers à gravir?', '120', '120 marches jusqu''à la crête!', 2, 'SHORT_TEXT'),
-    (20, 'Quel est le dénivelé du Sentier de l''Aventure?', '200', '200 mètres de dénivelé positif!', 1, 'SHORT_TEXT'),
-    (20, 'Combien de virages périlleux sur ce sentier?', '8', '8 virages requièrent de la prudence!', 2, 'SHORT_TEXT'),
-    (21, 'En quelle année ce menhir a-t-il été érigé?', '-2000', 'Érigé en -2000 av. J.-C!', 1, 'SHORT_TEXT'),
-    (21, 'Quelle est sa hauteur?', '5', '5 mètres de pierre millénaire!', 2, 'SHORT_TEXT'),
-    (22, 'Combien de sépultures contient ce dolmen?', '7', '7 squelettes d''ancêtres!', 1, 'SHORT_TEXT'),
-    (22, 'Quel type de pierre le compose?', '1', 'Granit et schiste!', 2, 'SHORT_TEXT'),
-    (23, 'Quel nombre apparaît en premier?', '13', 'Le nombre magique 13!', 1, 'SHORT_TEXT'),
-    (23, 'Combien d''énigmes avant la révélation?', '7', 'Sept défis roublards!', 2, 'SHORT_TEXT'),
-    (24, 'Quel symbole répété indique la voie?', '3', 'Le symbole du triangle!', 1, 'SHORT_TEXT'),
-    (24, 'Quel nombre cache se révèle?', '99', 'Le nombre 99!', 2, 'SHORT_TEXT'),
-    (25, 'Au centre de tous les mondes, quel nombre?', '1', 'L''unité des Korrigans!', 1, 'SHORT_TEXT'),
-    (25, 'Combien de piliers soutiennent ce sanctuaire?', '13', 'Les 13 Korrigans!', 2, 'SHORT_TEXT'),
-    (26, 'Quel est le secret ultime?', '1', 'L''amitié et la magie!', 1, 'SHORT_TEXT'),
-    (26, 'Que fais-tu maintenant?', '1', 'Tu collecionnes les autres badges!', 2, 'SHORT_TEXT')
+    -- Étape 2 - Énigme A (chapelle Sainte-Agathe)
+    (2, 'En quelle année la chapelle Sainte-Agathe a-t-elle été classée Monument Historique ? Repérez le chiffre des centaines et ôtez-lui la valeur de celui des milliers : ce résultat vaut A.', '7', 'La chapelle Sainte-Agathe a été classée en 1840, parmi les tout premiers monuments classés de France. Chiffre des centaines = 8, chiffre des milliers = 1, donc A = 8 − 1 = 7.', 1, 'SHORT_TEXT'),
+    -- Étape 2 - Énigme B (église Saint-Pierre-et-Saint-Paul)
+    (2, 'Combien de clochetons entourent le clocher de l''église Saint-Pierre-et-Saint-Paul ? Additionnez tous les chiffres pour n''en obtenir qu''un seul : ce résultat vaut B. (Indice : il y a autant de clochetons que d''apôtres.)', '3', 'Il y a 12 clochetons, autant que les 12 apôtres. 1 + 2 = 3, donc B = 3.', 2, 'SHORT_TEXT'),
+    -- Étape 3 - Énigme C (le lavoir)
+    (3, 'Un panneau figure sur le mur du lavoir. Qu''y est-il inscrit ? « Lavage de linge sale en famille interdit » → C = 7 ; « Pêche interdite » → C = 9 ; « Lavage de cerveau interdit » → C = 8.', '9', 'Le panneau du lavoir indique « Pêche interdite » : C = 9.', 1, 'SHORT_TEXT'),
+    -- Étape 4 - Énigme D (les Demoiselles)
+    (4, 'Deux demoiselles dansent autour d''un arbre. S''agit-il d''un pin maritime (D = 2), d''un chêne (D = 5) ou d''un peuplier (D = 8) ?', '5', 'L''arbre est un chêne : D = 5.', 1, 'SHORT_TEXT')
 ON CONFLICT DO NOTHING;
+
+-- Note : les coordonnées finales de la cache se déduisent des énigmes
+-- N 47°4(B).2(D)(Bx2)' / W 1°(D)0.(C)(A+1)0' avec A=7, B=3, C=9, D=5
+-- => N 47°43.256' / W 1°50.980' => 47.720933, -1.849667 (final_latitude / final_longitude)
 
 -- Add more test users if needed
 -- Users will be created through the signup API

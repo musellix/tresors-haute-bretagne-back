@@ -15,7 +15,19 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * Calcule les coordonnées finales d'une chasse à partir des réponses du joueur.
+ *
+ * <p>Chaque chasse porte sa propre formule ({@link TreasureHunt#getCoordinateFormula()}),
+ * exprimée en DMS (minutes décimales) avec des tokens à substituer par les réponses :
+ * <pre>N 47°4(B).2(D)(Bx2)' / W 1°(D)0.(C)(A+1)0'</pre>
+ * Les variables A, B, C, D... correspondent, dans l'ordre, aux réponses numériques correctes
+ * des énigmes (ordre des étapes puis des questions). Si la chasse n'a pas de formule, on
+ * renvoie directement les coordonnées finales stockées.
+ */
 @Service
 @RequiredArgsConstructor
 public class CoordinateCalculationService {
@@ -24,23 +36,44 @@ public class CoordinateCalculationService {
     private final StepRepository stepRepository;
     private final QuestionRepository questionRepository;
 
+    // Token de formule : (A), (Bx2), (A+1), (C-1)... -> variable + opérateur optionnel + nombre
+    private static final Pattern TOKEN = Pattern.compile("\\(([A-Z])(?:\\s*([x*+\\-])\\s*(\\d+))?\\)");
+    // Une coordonnée DMS en minutes décimales : N 47°43.256'
+    private static final Pattern DMS = Pattern.compile("([NSEW])\\s*(\\d+)\\s*°\\s*([0-9]+(?:\\.[0-9]+)?)\\s*'");
+
     public CalculatedCoordinates calculateCoordinates(Long userId, TreasureHunt hunt) {
-        List<Step> steps = stepRepository.findByTreasureHuntIdOrderByStepOrder(hunt.getId());
-        Map<Character, Integer> answerValues = extractAnswerValues(userId, steps);
-        return applyCoordinateFormula(answerValues, hunt);
+        String formula = hunt.getCoordinateFormula();
+
+        // Pas de formule pour cette chasse : on renvoie les coordonnées finales stockées.
+        if (formula == null || formula.isBlank()) {
+            return new CalculatedCoordinates(hunt.getFinalLatitude(), hunt.getFinalLongitude());
+        }
+
+        Map<Character, Integer> values = extractAnswerValues(userId, hunt);
+
+        try {
+            String resolved = substituteTokens(formula, values);
+            return parseDms(resolved);
+        } catch (RuntimeException e) {
+            // Formule invalide ou variable manquante : repli sur les coordonnées stockées.
+            return new CalculatedCoordinates(hunt.getFinalLatitude(), hunt.getFinalLongitude());
+        }
     }
 
-    private Map<Character, Integer> extractAnswerValues(Long userId, List<Step> steps) {
+    /**
+     * Associe A, B, C, D... aux réponses correctes (numériques),
+     * dans l'ordre des étapes puis des questions.
+     */
+    private Map<Character, Integer> extractAnswerValues(Long userId, TreasureHunt hunt) {
         Map<Character, Integer> values = new HashMap<>();
         char label = 'A';
-        
+
+        List<Step> steps = stepRepository.findByTreasureHuntIdOrderByStepOrder(hunt.getId());
         for (Step step : steps) {
             List<Question> questions = questionRepository.findByStepIdOrderByQuestionOrder(step.getId());
-            
             for (Question question : questions) {
                 List<UserAnswer> answers = userAnswerRepository.findByUserIdAndQuestionId(userId, question.getId());
-                
-                if (!answers.isEmpty() && answers.get(0).getIsCorrect()) {
+                if (!answers.isEmpty() && Boolean.TRUE.equals(answers.get(0).getIsCorrect())) {
                     Integer numericValue = extractNumericValue(answers.get(0).getAnswer());
                     if (numericValue != null) {
                         values.put(label, numericValue);
@@ -49,39 +82,78 @@ public class CoordinateCalculationService {
                 }
             }
         }
-        
         return values;
     }
 
     private Integer extractNumericValue(String answer) {
+        if (answer == null) {
+            return null;
+        }
         try {
             return Integer.parseInt(answer.trim());
         } catch (NumberFormatException e) {
-            String numbers = answer.replaceAll("[^0-9]", "");
-            if (!numbers.isEmpty()) {
-                return Integer.parseInt(numbers.substring(0, 1));
-            }
-            return null;
+            String digits = answer.replaceAll("[^0-9]", "");
+            return digits.isEmpty() ? null : Integer.parseInt(digits);
         }
     }
 
-    private CalculatedCoordinates applyCoordinateFormula(Map<Character, Integer> values, TreasureHunt hunt) {
-        Integer a = values.getOrDefault('A', 0);
-        Integer b = values.getOrDefault('B', 0);
-        Integer c = values.getOrDefault('C', 0);
-        Integer d = values.getOrDefault('D', 0);
-        
-        String latDegrees = "47";
-        String latMinutes = "4" + b + ".2" + d + (b * 2);
-        Double latitude = Double.parseDouble(latDegrees + (latMinutes.length() > 0 ? "." + latMinutes : ""));
-        
-        String lonDegrees = "1";
-        String lonMinutes = d + "0." + c + (a + 1) + "0";
-        Double longitude = -(Double.parseDouble(lonDegrees + (lonMinutes.length() > 0 ? "." + lonMinutes : "")));
-        
-        latitude = Math.round(latitude * 1000000.0) / 1000000.0;
-        longitude = Math.round(longitude * 1000000.0) / 1000000.0;
-        
+    /**
+     * Remplace chaque token (A), (Bx2), (A+1)... par sa valeur numérique calculée.
+     */
+    private String substituteTokens(String formula, Map<Character, Integer> values) {
+        Matcher m = TOKEN.matcher(formula);
+        StringBuilder out = new StringBuilder();
+        while (m.find()) {
+            char var = m.group(1).charAt(0);
+            Integer value = values.get(var);
+            if (value == null) {
+                throw new IllegalStateException("Valeur manquante pour la variable " + var);
+            }
+            int result = value;
+            if (m.group(2) != null) {
+                int operand = Integer.parseInt(m.group(3));
+                result = switch (m.group(2)) {
+                    case "x", "*" -> value * operand;
+                    case "+" -> value + operand;
+                    case "-" -> value - operand;
+                    default -> value;
+                };
+            }
+            m.appendReplacement(out, Integer.toString(result));
+        }
+        m.appendTail(out);
+        return out.toString();
+    }
+
+    /**
+     * Convertit une formule résolue "N 47°43.256' / W 1°50.980'" en coordonnées décimales
+     * (degrés + minutes / 60, signe négatif pour S et W).
+     */
+    private CalculatedCoordinates parseDms(String resolved) {
+        Matcher m = DMS.matcher(resolved);
+        Double latitude = null;
+        Double longitude = null;
+
+        while (m.find()) {
+            String hemisphere = m.group(1);
+            int degrees = Integer.parseInt(m.group(2));
+            double minutes = Double.parseDouble(m.group(3));
+            double decimal = degrees + minutes / 60.0;
+            if (hemisphere.equals("S") || hemisphere.equals("W")) {
+                decimal = -decimal;
+            }
+            decimal = Math.round(decimal * 1_000_000.0) / 1_000_000.0;
+
+            if (hemisphere.equals("N") || hemisphere.equals("S")) {
+                latitude = decimal;
+            } else {
+                longitude = decimal;
+            }
+        }
+
+        if (latitude == null || longitude == null) {
+            throw new IllegalStateException("Coordonnées DMS incomplètes : " + resolved);
+        }
         return new CalculatedCoordinates(latitude, longitude);
     }
 

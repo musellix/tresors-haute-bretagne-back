@@ -39,6 +39,15 @@ public class TreasureHunt {
 
     private String treasureImageUrl;
 
+    /**
+     * Formule de calcul des coordonnées finales à partir des réponses (énigmes).
+     * Tokens supportés : (A), (Bx2), (A+1)... sur une coordonnée DMS en minutes décimales.
+     * Ex : N 47°4(B).2(D)(Bx2)' / W 1°(D)0.(C)(A+1)0'
+     * Si null, on utilise directement finalLatitude / finalLongitude.
+     */
+    @Column(name = "coordinate_formula")
+    private String coordinateFormula;
+
     @OneToMany(mappedBy = "treasureHunt", cascade = CascadeType.ALL)
     private List<Step> steps;
 
