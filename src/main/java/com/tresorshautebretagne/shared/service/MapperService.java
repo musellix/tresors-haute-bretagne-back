@@ -1,6 +1,5 @@
 package com.tresorshautebretagne.shared.service;
 
-import com.tresorshautebretagne.treasureHunt.TreasureHuntDTO;
 import com.tresorshautebretagne.treasureHunt.step.Step;
 import com.tresorshautebretagne.treasureHunt.step.StepDTO;
 import com.tresorshautebretagne.treasureHunt.dialogue.Dialogue;

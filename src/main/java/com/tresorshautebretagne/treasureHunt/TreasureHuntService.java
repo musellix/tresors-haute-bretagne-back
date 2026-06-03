@@ -1,8 +1,6 @@
 package com.tresorshautebretagne.treasureHunt;
 
-import com.tresorshautebretagne.treasureHunt.TreasureHuntDTO;
 import com.tresorshautebretagne.treasureHunt.step.StepDTO;
-import com.tresorshautebretagne.treasureHunt.step.Step;
 import com.tresorshautebretagne.treasureHunt.step.StepRepository;
 import com.tresorshautebretagne.shared.service.MapperService;
 import lombok.RequiredArgsConstructor;
