@@ -42,14 +42,4 @@ public class KorriganController {
         return ResponseEntity.ok(themes);
     }
 
-    @PostMapping
-    public ResponseEntity<KorriganDTO> createKorrigan(@RequestBody KorriganDTO korriganDTO) {
-        Korrigan korrigan = new Korrigan();
-        korrigan.setName(korriganDTO.getName());
-        korrigan.setDescription(korriganDTO.getDescription());
-        korrigan.setImageUrl(korriganDTO.getImageUrl());
-        
-        Korrigan saved = korriganRepository.save(korrigan);
-        return ResponseEntity.ok(mapperService.korriganToDTO(saved));
-    }
 }

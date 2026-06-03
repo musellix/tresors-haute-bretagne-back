@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url VARCHAR(500),
     google_id VARCHAR(255) UNIQUE,
     email_verified BOOLEAN NOT NULL DEFAULT false,
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP

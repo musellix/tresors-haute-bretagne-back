@@ -1,6 +1,5 @@
 package com.tresorshautebretagne.theme;
 
-import com.tresorshautebretagne.korrigan.KorriganRepository;
 import com.tresorshautebretagne.shared.service.MapperService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 public class ThemeController {
 
     private final ThemeRepository themeRepository;
-    private final KorriganRepository korriganRepository;
     private final MapperService mapperService;
 
     @GetMapping
@@ -33,19 +31,4 @@ public class ThemeController {
         return ResponseEntity.ok(mapperService.themeToDTO(theme));
     }
 
-    @PostMapping
-    public ResponseEntity<ThemeDTO> createTheme(@RequestBody ThemeDTO themeDTO) {
-        Theme theme = new Theme();
-        theme.setName(themeDTO.getName());
-        theme.setDescription(themeDTO.getDescription());
-        theme.setImageUrl(themeDTO.getImageUrl());
-        
-        if (themeDTO.getKorriganId() != null) {
-            theme.setKorrigan(korriganRepository.findById(themeDTO.getKorriganId())
-                    .orElseThrow(() -> new RuntimeException("Korrigan not found")));
-        }
-        
-        Theme saved = themeRepository.save(theme);
-        return ResponseEntity.ok(mapperService.themeToDTO(saved));
-    }
 }

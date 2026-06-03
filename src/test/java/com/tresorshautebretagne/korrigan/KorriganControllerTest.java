@@ -1,6 +1,5 @@
 package com.tresorshautebretagne.korrigan;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tresorshautebretagne.shared.service.MapperService;
 import com.tresorshautebretagne.theme.Theme;
 import com.tresorshautebretagne.theme.ThemeDTO;
@@ -10,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class KorriganControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
 
     @MockBean KorriganRepository korriganRepository;
     @MockBean ThemeRepository themeRepository;
@@ -119,20 +115,4 @@ class KorriganControllerTest {
                 .andExpect(jsonPath("$").isEmpty());
     }
 
-    @Test
-    void createKorrigan_returns200WithCreatedDTO() throws Exception {
-        KorriganDTO requestDTO = buildDTO(null);
-        Korrigan saved = buildEntity(5L);
-        KorriganDTO responseDTO = buildDTO(5L);
-
-        when(korriganRepository.save(any(Korrigan.class))).thenReturn(saved);
-        when(mapperService.korriganToDTO(saved)).thenReturn(responseDTO);
-
-        mockMvc.perform(post("/korrigans")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.name").value("Korrigan 5"));
-    }
 }

@@ -1,21 +1,17 @@
 package com.tresorshautebretagne.theme;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tresorshautebretagne.korrigan.Korrigan;
-import com.tresorshautebretagne.korrigan.KorriganRepository;
 import com.tresorshautebretagne.shared.service.MapperService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -24,10 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ThemeControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
 
     @MockBean ThemeRepository themeRepository;
-    @MockBean KorriganRepository korriganRepository;
     @MockBean MapperService mapperService;
 
     private ThemeDTO buildDTO(Long id) {
@@ -95,44 +89,5 @@ class ThemeControllerTest {
 
         mockMvc.perform(get("/themes/99"))
                 .andExpect(status().is5xxServerError());
-    }
-
-    @Test
-    void createTheme_withKorrigan_returns200WithCreatedDTO() throws Exception {
-        ThemeDTO requestDTO = buildDTO(null);
-        requestDTO.setKorriganId(1L);
-
-        Korrigan korrigan = new Korrigan();
-        korrigan.setId(1L);
-        Theme saved = buildTheme(3L);
-        ThemeDTO responseDTO = buildDTO(3L);
-
-        when(korriganRepository.findById(1L)).thenReturn(Optional.of(korrigan));
-        when(themeRepository.save(any(Theme.class))).thenReturn(saved);
-        when(mapperService.themeToDTO(saved)).thenReturn(responseDTO);
-
-        mockMvc.perform(post("/themes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(3));
-    }
-
-    @Test
-    void createTheme_withoutKorrigan_returns200() throws Exception {
-        ThemeDTO requestDTO = new ThemeDTO();
-        requestDTO.setName("Nouveau thème");
-        requestDTO.setKorriganId(null);
-
-        Theme saved = buildTheme(4L);
-        ThemeDTO responseDTO = buildDTO(4L);
-
-        when(themeRepository.save(any(Theme.class))).thenReturn(saved);
-        when(mapperService.themeToDTO(saved)).thenReturn(responseDTO);
-
-        mockMvc.perform(post("/themes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk());
     }
 }

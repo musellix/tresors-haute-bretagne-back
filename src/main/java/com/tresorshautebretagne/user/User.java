@@ -1,6 +1,7 @@
 package com.tresorshautebretagne.user;
 
 import jakarta.persistence.*;
+import com.tresorshautebretagne.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,10 @@ public class User {
 
     @Column(nullable = false)
     private Boolean emailVerified = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role = Role.USER;
 
     @Column(nullable = false)
     private Boolean isActive = true;

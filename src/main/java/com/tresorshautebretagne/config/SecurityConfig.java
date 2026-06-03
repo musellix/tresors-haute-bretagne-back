@@ -45,6 +45,7 @@ public class SecurityConfig {
                     "/auth/refresh",
                     "/auth/resend-verification"
                 ).permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
