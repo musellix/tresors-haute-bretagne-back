@@ -1,6 +1,7 @@
 package com.tresorshautebretagne.userProgress;
 
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +45,17 @@ public class UserProgressController {
             @RequestBody SubmitAnswersRequest request) {
         return ResponseEntity.ok(userProgressService.submitAnswers(
                 principal.getUsername(), huntId, stepId, request.getAnswers()));
+    }
+
+    @PostMapping("/{huntId}/steps/{stepId}/check-proximity")
+    public ResponseEntity<ProximityCheckResult> checkProximity(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId,
+            @PathVariable Long stepId,
+            @Valid @RequestBody ProximityCheckRequest request) {
+        return ResponseEntity.ok(userProgressService.checkProximity(
+                principal.getUsername(), huntId, stepId,
+                request.getLatitude(), request.getLongitude()));
     }
 
     @GetMapping("/{huntId}/steps/{stepId}/hint")

@@ -109,6 +109,20 @@ public class UserProgressService {
         return result;
     }
 
+    public ProximityCheckResult checkProximity(String userEmail, Long huntId, Long stepId,
+                                               double playerLat, double playerLon) {
+        findUserByEmail(userEmail);
+        Step step = stepRepository.findById(stepId)
+                .orElseThrow(() -> new RuntimeException("Step not found: " + stepId));
+
+        if (!step.getTreasureHunt().getId().equals(huntId)) {
+            throw new RuntimeException("Step does not belong to this hunt");
+        }
+
+        int distance = haversineMeters(playerLat, playerLon, step.getLatitude(), step.getLongitude());
+        return new ProximityCheckResult(distance <= step.getRadiusMeters(), distance, step.getRadiusMeters());
+    }
+
     public HintDTO getHint(String userEmail, Long huntId, Long stepId) {
         User user = findUserByEmail(userEmail);
         Step step = stepRepository.findById(stepId)
@@ -189,6 +203,16 @@ public class UserProgressService {
                 userAnswerRepository.findFirstByUserIdAndQuestionId(userId, q.getId())
                         .map(UserAnswer::getIsCorrect)
                         .orElse(false));
+    }
+
+    private int haversineMeters(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6_371_000; // rayon de la Terre en mètres
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return (int) Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
     private User findUserByEmail(String email) {
