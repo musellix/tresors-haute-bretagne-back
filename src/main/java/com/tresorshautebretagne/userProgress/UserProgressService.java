@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,15 +35,13 @@ public class UserProgressService {
     private final CoordinateCalculationService coordinateService;
 
     @Transactional
-    public UserProgressDTO startTreasureHunt(Long userId, Long treasureHuntId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-        
-        TreasureHunt hunt = treasureHuntRepository.findById(treasureHuntId)
-                .orElseThrow(() -> new RuntimeException("Treasure hunt not found: " + treasureHuntId));
+    public UserProgressDTO startTreasureHunt(String userEmail, Long huntId) {
+        User user = findUserByEmail(userEmail);
+        TreasureHunt hunt = treasureHuntRepository.findById(huntId)
+                .orElseThrow(() -> new RuntimeException("Treasure hunt not found: " + huntId));
 
         UserProgress progress = userProgressRepository
-                .findByUserIdAndTreasureHuntId(userId, treasureHuntId)
+                .findByUserIdAndTreasureHuntId(user.getId(), huntId)
                 .orElse(new UserProgress());
 
         progress.setUser(user);
@@ -51,107 +50,149 @@ public class UserProgressService {
         progress.setIsCompleted(false);
         progress.setIsTreasureUnlocked(false);
 
-        UserProgress saved = userProgressRepository.save(progress);
-        return mapperService.userProgressToDTO(saved);
+        return mapperService.userProgressToDTO(userProgressRepository.save(progress));
     }
 
     @Transactional
-    public void submitAnswer(Long userId, Long questionId, String answer) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+    public SubmitAnswersResultDTO submitAnswers(String userEmail, Long huntId, Long stepId,
+                                                List<SubmitAnswersRequest.AnswerItem> answers) {
+        User user = findUserByEmail(userEmail);
+        treasureHuntRepository.findById(huntId)
+                .orElseThrow(() -> new RuntimeException("Treasure hunt not found: " + huntId));
+        Step step = stepRepository.findById(stepId)
+                .orElseThrow(() -> new RuntimeException("Step not found: " + stepId));
 
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new RuntimeException("Question not found: " + questionId));
+        if (!step.getTreasureHunt().getId().equals(huntId)) {
+            throw new RuntimeException("Step does not belong to this hunt");
+        }
 
-        String normalizedAnswer = answer.trim().toLowerCase();
-        String normalizedCorrect = question.getCorrectAnswer().trim().toLowerCase();
-        
-        Boolean isCorrect = normalizedAnswer.equals(normalizedCorrect);
+        for (SubmitAnswersRequest.AnswerItem item : answers) {
+            Question question = questionRepository.findById(item.getQuestionId())
+                    .orElseThrow(() -> new RuntimeException("Question not found: " + item.getQuestionId()));
 
-        UserAnswer userAnswer = new UserAnswer();
-        userAnswer.setUser(user);
-        userAnswer.setQuestion(question);
-        userAnswer.setAnswer(answer);
-        userAnswer.setIsCorrect(isCorrect);
+            boolean isCorrect = item.getAnswer().trim().toLowerCase()
+                    .equals(question.getCorrectAnswer().trim().toLowerCase());
 
-        userAnswerRepository.save(userAnswer);
+            UserAnswer userAnswer = userAnswerRepository
+                    .findFirstByUserIdAndQuestionId(user.getId(), item.getQuestionId())
+                    .orElse(new UserAnswer());
+            userAnswer.setUser(user);
+            userAnswer.setQuestion(question);
+            userAnswer.setAnswer(item.getAnswer());
+            userAnswer.setIsCorrect(isCorrect);
+            userAnswerRepository.save(userAnswer);
+        }
+
+        boolean allCorrect = allQuestionsAnsweredCorrectly(user.getId(), stepId);
+
+        if (allCorrect) {
+            UserProgress progress = userProgressRepository
+                    .findByUserIdAndTreasureHuntId(user.getId(), huntId)
+                    .orElseThrow(() -> new RuntimeException("No progress found"));
+
+            List<Step> allSteps = stepRepository.findByTreasureHuntIdOrderByStepOrder(huntId);
+            boolean isLastStep = allSteps.stream()
+                    .max(Comparator.comparingInt(Step::getStepOrder))
+                    .map(s -> s.getId().equals(stepId))
+                    .orElse(false);
+
+            if (isLastStep) {
+                progress.setIsTreasureUnlocked(true);
+            } else {
+                progress.setCurrentStep(progress.getCurrentStep() + 1);
+            }
+            userProgressRepository.save(progress);
+        }
+
+        SubmitAnswersResultDTO result = new SubmitAnswersResultDTO();
+        result.setAllCorrect(allCorrect);
+        return result;
     }
 
-    public UserProgressDTO getUserProgress(Long userId, Long treasureHuntId) {
-        UserProgress progress = userProgressRepository
-                .findByUserIdAndTreasureHuntId(userId, treasureHuntId)
-                .orElseThrow(() -> new RuntimeException("No progress found"));
+    public HintDTO getHint(String userEmail, Long huntId, Long stepId) {
+        User user = findUserByEmail(userEmail);
+        Step step = stepRepository.findById(stepId)
+                .orElseThrow(() -> new RuntimeException("Step not found: " + stepId));
 
+        if (!step.getTreasureHunt().getId().equals(huntId)) {
+            throw new RuntimeException("Step does not belong to this hunt");
+        }
+
+        List<Long> wrongQuestionIds = questionRepository.findByStepIdOrderByQuestionOrder(stepId).stream()
+                .filter(q -> userAnswerRepository
+                        .findFirstByUserIdAndQuestionId(user.getId(), q.getId())
+                        .map(a -> !a.getIsCorrect())
+                        .orElse(true))
+                .map(Question::getId)
+                .collect(Collectors.toList());
+
+        HintDTO hint = new HintDTO();
+        hint.setWrongQuestionIds(wrongQuestionIds);
+        return hint;
+    }
+
+    public UserProgressDTO getUserProgress(String userEmail, Long huntId) {
+        User user = findUserByEmail(userEmail);
+        UserProgress progress = userProgressRepository
+                .findByUserIdAndTreasureHuntId(user.getId(), huntId)
+                .orElseThrow(() -> new RuntimeException("No progress found"));
         return mapperService.userProgressToDTO(progress);
     }
 
-    public List<UserProgressDTO> getUserProgresses(Long userId) {
-        return userProgressRepository.findByUserId(userId)
-                .stream()
+    public List<UserProgressDTO> getUserProgresses(String userEmail) {
+        User user = findUserByEmail(userEmail);
+        return userProgressRepository.findByUserId(user.getId()).stream()
                 .map(mapperService::userProgressToDTO)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void checkAndUnlockTreasure(Long userId, Long treasureHuntId) {
+    public CoordinateCalculationService.CalculatedCoordinates calculateTreasureCoordinates(String userEmail, Long huntId) {
+        User user = findUserByEmail(userEmail);
         UserProgress progress = userProgressRepository
-                .findByUserIdAndTreasureHuntId(userId, treasureHuntId)
-                .orElseThrow(() -> new RuntimeException("No progress found"));
-
-        TreasureHunt hunt = progress.getTreasureHunt();
-        List<Step> steps = stepRepository.findByTreasureHuntIdOrderByStepOrder(hunt.getId());
-
-        boolean allCorrect = steps.stream().allMatch(step -> 
-            allQuestionsAnsweredCorrectly(userId, step.getId())
-        );
-
-        if (allCorrect) {
-            progress.setIsCompleted(true);
-            progress.setIsTreasureUnlocked(true);
-            progress.setCompletedAt(LocalDateTime.now());
-            userProgressRepository.save(progress);
-        }
-    }
-
-    public boolean allQuestionsAnsweredCorrectly(Long userId, Long stepId) {
-        List<Question> questions = questionRepository.findByStepIdOrderByQuestionOrder(stepId);
-        
-        if (questions.isEmpty()) {
-            return true;
-        }
-
-        return questions.stream().allMatch(question -> {
-            List<UserAnswer> answers = userAnswerRepository.findByUserIdAndQuestionId(userId, question.getId());
-            return !answers.isEmpty() && answers.stream().allMatch(UserAnswer::getIsCorrect);
-        });
-    }
-
-    @Transactional
-    public CoordinateCalculationService.CalculatedCoordinates calculateTreasureCoordinates(Long userId, Long treasureHuntId) {
-        UserProgress progress = userProgressRepository
-                .findByUserIdAndTreasureHuntId(userId, treasureHuntId)
+                .findByUserIdAndTreasureHuntId(user.getId(), huntId)
                 .orElseThrow(() -> new RuntimeException("No progress found"));
 
         if (!progress.getIsTreasureUnlocked()) {
             throw new RuntimeException("Treasure not yet unlocked");
         }
 
-        TreasureHunt hunt = progress.getTreasureHunt();
-        return coordinateService.calculateCoordinates(userId, hunt);
+        return coordinateService.calculateCoordinates(user.getId(), progress.getTreasureHunt());
     }
 
     @Transactional
-    public void advanceStep(Long userId, Long treasureHuntId) {
+    public void validateCode(String userEmail, Long huntId, String code) {
+        User user = findUserByEmail(userEmail);
+        TreasureHunt hunt = treasureHuntRepository.findById(huntId)
+                .orElseThrow(() -> new RuntimeException("Treasure hunt not found: " + huntId));
         UserProgress progress = userProgressRepository
-                .findByUserIdAndTreasureHuntId(userId, treasureHuntId)
+                .findByUserIdAndTreasureHuntId(user.getId(), huntId)
                 .orElseThrow(() -> new RuntimeException("No progress found"));
 
-        TreasureHunt hunt = progress.getTreasureHunt();
-        int totalSteps = stepRepository.findByTreasureHuntIdOrderByStepOrder(hunt.getId()).size();
-
-        if (progress.getCurrentStep() < totalSteps) {
-            progress.setCurrentStep(progress.getCurrentStep() + 1);
-            userProgressRepository.save(progress);
+        if (!progress.getIsTreasureUnlocked()) {
+            throw new RuntimeException("Treasure not yet unlocked");
         }
+        if (!code.equals(hunt.getAccessCode())) {
+            throw new RuntimeException("Code incorrect");
+        }
+
+        progress.setIsCompleted(true);
+        progress.setCompletedAt(LocalDateTime.now());
+        userProgressRepository.save(progress);
+    }
+
+    private boolean allQuestionsAnsweredCorrectly(Long userId, Long stepId) {
+        List<Question> questions = questionRepository.findByStepIdOrderByQuestionOrder(stepId);
+        if (questions.isEmpty()) {
+            return true;
+        }
+        return questions.stream().allMatch(q ->
+                userAnswerRepository.findFirstByUserIdAndQuestionId(userId, q.getId())
+                        .map(UserAnswer::getIsCorrect)
+                        .orElse(false));
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
     }
 }

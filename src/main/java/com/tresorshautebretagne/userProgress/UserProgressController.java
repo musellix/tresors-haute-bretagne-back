@@ -1,10 +1,10 @@
 package com.tresorshautebretagne.userProgress;
 
-import com.tresorshautebretagne.treasureHunt.question.Question;
-import com.tresorshautebretagne.treasureHunt.question.QuestionRepository;
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,82 +15,63 @@ import java.util.List;
 public class UserProgressController {
 
     private final UserProgressService userProgressService;
-    private final QuestionRepository questionRepository;
 
-    @PostMapping("/start/{userId}/{treasureHuntId}")
+    @PostMapping("/{huntId}/start")
     public ResponseEntity<UserProgressDTO> startTreasureHunt(
-            @PathVariable Long userId,
-            @PathVariable Long treasureHuntId) {
-        UserProgressDTO progress = userProgressService.startTreasureHunt(userId, treasureHuntId);
-        return ResponseEntity.ok(progress);
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId) {
+        return ResponseEntity.ok(userProgressService.startTreasureHunt(principal.getUsername(), huntId));
     }
 
-    @GetMapping("/{userId}/{treasureHuntId}")
-    public ResponseEntity<UserProgressDTO> getUserProgress(
-            @PathVariable Long userId,
-            @PathVariable Long treasureHuntId) {
-        UserProgressDTO progress = userProgressService.getUserProgress(userId, treasureHuntId);
-        return ResponseEntity.ok(progress);
-    }
-
-    @GetMapping("/{userId}")
+    @GetMapping
     public ResponseEntity<List<UserProgressDTO>> getUserProgresses(
-            @PathVariable Long userId) {
-        List<UserProgressDTO> progresses = userProgressService.getUserProgresses(userId);
-        return ResponseEntity.ok(progresses);
+            @AuthenticationPrincipal UserDetails principal) {
+        return ResponseEntity.ok(userProgressService.getUserProgresses(principal.getUsername()));
     }
 
-    @PostMapping("/{userId}/answer")
-    public ResponseEntity<AnswerFeedbackDTO> submitAnswer(
-            @PathVariable Long userId,
-            @RequestBody AnswerSubmitDTO answerSubmit) {
-        
-        Question question = questionRepository.findById(answerSubmit.getQuestionId())
-                .orElseThrow(() -> new RuntimeException("Question not found"));
-
-        userProgressService.submitAnswer(userId, answerSubmit.getQuestionId(), answerSubmit.getAnswer());
-
-        String normalizedAnswer = answerSubmit.getAnswer().trim().toLowerCase();
-        String normalizedCorrect = question.getCorrectAnswer().trim().toLowerCase();
-        Boolean isCorrect = normalizedAnswer.equals(normalizedCorrect);
-
-        AnswerFeedbackDTO feedback = new AnswerFeedbackDTO();
-        feedback.setQuestionId(question.getId());
-        feedback.setIsCorrect(isCorrect);
-        feedback.setExplanation(question.getExplanation());
-        feedback.setUserAnswer(answerSubmit.getAnswer());
-
-        return ResponseEntity.ok(feedback);
+    @GetMapping("/{huntId}")
+    public ResponseEntity<UserProgressDTO> getUserProgress(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId) {
+        return ResponseEntity.ok(userProgressService.getUserProgress(principal.getUsername(), huntId));
     }
 
-    @PostMapping("/{userId}/{treasureHuntId}/check-unlock")
-    public ResponseEntity<Void> checkAndUnlockTreasure(
-            @PathVariable Long userId,
-            @PathVariable Long treasureHuntId) {
-        userProgressService.checkAndUnlockTreasure(userId, treasureHuntId);
-        return ResponseEntity.ok().build();
+    @PostMapping("/{huntId}/steps/{stepId}/submit-answers")
+    public ResponseEntity<SubmitAnswersResultDTO> submitAnswers(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId,
+            @PathVariable Long stepId,
+            @RequestBody SubmitAnswersRequest request) {
+        return ResponseEntity.ok(userProgressService.submitAnswers(
+                principal.getUsername(), huntId, stepId, request.getAnswers()));
     }
 
-    @GetMapping("/{userId}/{treasureHuntId}/treasure-coordinates")
+    @GetMapping("/{huntId}/steps/{stepId}/hint")
+    public ResponseEntity<HintDTO> getHint(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId,
+            @PathVariable Long stepId) {
+        return ResponseEntity.ok(userProgressService.getHint(principal.getUsername(), huntId, stepId));
+    }
+
+    @GetMapping("/{huntId}/treasure-coordinates")
     public ResponseEntity<TreasureCoordinatesDTO> getTreasureCoordinates(
-            @PathVariable Long userId,
-            @PathVariable Long treasureHuntId) {
-        CoordinateCalculationService.CalculatedCoordinates coords = 
-            userProgressService.calculateTreasureCoordinates(userId, treasureHuntId);
-        
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId) {
+        CoordinateCalculationService.CalculatedCoordinates coords =
+                userProgressService.calculateTreasureCoordinates(principal.getUsername(), huntId);
         TreasureCoordinatesDTO dto = new TreasureCoordinatesDTO();
         dto.setLatitude(coords.getLatitude());
         dto.setLongitude(coords.getLongitude());
-        
         return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("/{userId}/{treasureHuntId}/advance-step")
-    public ResponseEntity<UserProgressDTO> advanceStep(
-            @PathVariable Long userId,
-            @PathVariable Long treasureHuntId) {
-        userProgressService.advanceStep(userId, treasureHuntId);
-        UserProgressDTO progress = userProgressService.getUserProgress(userId, treasureHuntId);
-        return ResponseEntity.ok(progress);
+    @PostMapping("/{huntId}/validate-code")
+    public ResponseEntity<Void> validateCode(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long huntId,
+            @RequestBody ValidateCodeRequest request) {
+        userProgressService.validateCode(principal.getUsername(), huntId, request.getCode());
+        return ResponseEntity.ok().build();
     }
 }

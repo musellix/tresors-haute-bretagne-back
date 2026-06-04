@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS treasure_hunts (
     final_longitude DOUBLE PRECISION NOT NULL,
     treasure_image_url VARCHAR(500),
     coordinate_formula VARCHAR(255),
+    access_code VARCHAR(8),
     is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
@@ -118,7 +119,8 @@ CREATE TABLE IF NOT EXISTS user_answers (
     is_correct BOOLEAN NOT NULL,
     answered_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (question_id) REFERENCES questions(id)
+    FOREIGN KEY (question_id) REFERENCES questions(id),
+    UNIQUE (user_id, question_id)
 );
 
 -- Refresh tokens table

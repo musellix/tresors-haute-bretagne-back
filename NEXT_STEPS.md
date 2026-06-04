@@ -69,3 +69,10 @@ Retourne tous les utilisateurs d'un coup. Utiliser `Pageable` Spring Data.
 - Spring Security + JWT (7 jours) + refresh token rotatif (90 jours)
 - CORS, GlobalExceptionHandler, BCrypt
 - Tests unitaires pour tous les modules existants (avant auth/admin)
+- **Flux de jeu complet** (refonte UserProgress) :
+  - `POST /user-progress/{huntId}/steps/{stepId}/submit-answers` — soumission groupée, upsert (bug #1 corrigé), avance d'étape ou débloque le trésor automatiquement
+  - `GET /user-progress/{huntId}/steps/{stepId}/hint` — retourne les `questionId` incorrects/manquants
+  - `POST /user-progress/{huntId}/validate-code` — valide le code final 8 chars → marque la chasse terminée
+  - `{userId}` supprimé de toutes les URLs → `@AuthenticationPrincipal` (bug #2 corrigé)
+  - `accessCode` ajouté sur `TreasureHunt` (schéma + entité + admin DTO + AdminService)
+  - Contrainte `UNIQUE (user_id, question_id)` sur `user_answers`

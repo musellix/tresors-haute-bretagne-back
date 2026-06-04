@@ -256,6 +256,7 @@ public class AdminService {
         hunt.setFinalLongitude(req.getFinalLongitude());
         hunt.setTreasureImageUrl(req.getTreasureImageUrl());
         hunt.setCoordinateFormula(req.getCoordinateFormula());
+        hunt.setAccessCode(req.getAccessCode());
         hunt.setIsActive(req.getIsActive() != null ? req.getIsActive() : true);
     }
 

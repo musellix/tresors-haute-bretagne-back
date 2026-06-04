@@ -48,6 +48,9 @@ public class TreasureHunt {
     @Column(name = "coordinate_formula")
     private String coordinateFormula;
 
+    @Column(name = "access_code", length = 8)
+    private String accessCode;
+
     @OneToMany(mappedBy = "treasureHunt", cascade = CascadeType.ALL)
     private List<Step> steps;
 

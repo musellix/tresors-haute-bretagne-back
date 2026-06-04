@@ -2,36 +2,51 @@ package com.tresorshautebretagne.userProgress;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;
-import com.tresorshautebretagne.treasureHunt.question.Question;
-import com.tresorshautebretagne.treasureHunt.question.QuestionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(value = UserProgressController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@WebMvcTest(UserProgressController.class)
+@Import(UserProgressControllerTest.TestSecurityConfig.class)
 class UserProgressControllerTest {
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        SecurityFilterChain testChain(HttpSecurity http) throws Exception {
+            return http.csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(a -> a.anyRequest().permitAll())
+                    .build();
+        }
+    }
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
     @MockBean UserProgressService userProgressService;
-    @MockBean QuestionRepository questionRepository;
 
-    private UserProgressDTO buildProgressDTO(Long userId, Long huntId, int step) {
+    private static final String EMAIL = "user@test.com";
+
+    private UserProgressDTO buildProgressDTO(Long huntId, int step) {
         UserProgressDTO dto = new UserProgressDTO();
         dto.setId(1L);
-        dto.setUserId(userId);
+        dto.setUserId(1L);
         dto.setTreasureHuntId(huntId);
         dto.setCurrentStep(step);
         dto.setIsCompleted(false);
@@ -41,141 +56,121 @@ class UserProgressControllerTest {
     }
 
     @Test
-    void startTreasureHunt_returns200WithProgress() throws Exception {
-        UserProgressDTO dto = buildProgressDTO(1L, 1L, 1);
-        when(userProgressService.startTreasureHunt(1L, 1L)).thenReturn(dto);
+    @WithMockUser(username = EMAIL)
+    void startTreasureHunt_returns200() throws Exception {
+        when(userProgressService.startTreasureHunt(EMAIL, 1L)).thenReturn(buildProgressDTO(1L, 1));
 
-        mockMvc.perform(post("/user-progress/start/1/1"))
+        mockMvc.perform(post("/user-progress/1/start"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(1))
-                .andExpect(jsonPath("$.treasureHuntId").value(1))
                 .andExpect(jsonPath("$.currentStep").value(1));
     }
 
     @Test
-    void getUserProgress_returns200() throws Exception {
-        UserProgressDTO dto = buildProgressDTO(1L, 1L, 2);
-        when(userProgressService.getUserProgress(1L, 1L)).thenReturn(dto);
-
-        mockMvc.perform(get("/user-progress/1/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId").value(1))
-                .andExpect(jsonPath("$.currentStep").value(2));
-    }
-
-    @Test
+    @WithMockUser(username = EMAIL)
     void getUserProgresses_returns200WithList() throws Exception {
-        when(userProgressService.getUserProgresses(1L))
-                .thenReturn(List.of(buildProgressDTO(1L, 1L, 1), buildProgressDTO(1L, 2L, 1)));
+        when(userProgressService.getUserProgresses(EMAIL))
+                .thenReturn(List.of(buildProgressDTO(1L, 1), buildProgressDTO(2L, 1)));
 
-        mockMvc.perform(get("/user-progress/1"))
+        mockMvc.perform(get("/user-progress"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
-    void submitAnswer_returnsCorrectFeedback_whenAnswerIsRight() throws Exception {
-        Question question = new Question();
-        question.setId(1L);
-        question.setCorrectAnswer("5");
-        question.setExplanation("Parce que 5");
+    @WithMockUser(username = EMAIL)
+    void getUserProgress_returns200() throws Exception {
+        when(userProgressService.getUserProgress(EMAIL, 1L)).thenReturn(buildProgressDTO(1L, 2));
 
-        AnswerSubmitDTO request = new AnswerSubmitDTO();
-        request.setQuestionId(1L);
-        request.setAnswer("5");
+        mockMvc.perform(get("/user-progress/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentStep").value(2));
+    }
 
-        when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
+    @Test
+    @WithMockUser(username = EMAIL)
+    void submitAnswers_returns200WithResult() throws Exception {
+        SubmitAnswersRequest.AnswerItem item = new SubmitAnswersRequest.AnswerItem();
+        item.setQuestionId(1L);
+        item.setAnswer("5");
+        SubmitAnswersRequest request = new SubmitAnswersRequest();
+        request.setAnswers(List.of(item));
 
-        mockMvc.perform(post("/user-progress/1/answer")
+        SubmitAnswersResultDTO result = new SubmitAnswersResultDTO();
+        result.setAllCorrect(true);
+
+        when(userProgressService.submitAnswers(EMAIL, 1L, 10L, request.getAnswers())).thenReturn(result);
+
+        mockMvc.perform(post("/user-progress/1/steps/10/submit-answers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.questionId").value(1))
-                .andExpect(jsonPath("$.isCorrect").value(true))
-                .andExpect(jsonPath("$.explanation").value("Parce que 5"))
-                .andExpect(jsonPath("$.userAnswer").value("5"));
+                .andExpect(jsonPath("$.allCorrect").value(true));
     }
 
     @Test
-    void submitAnswer_returnsIncorrectFeedback_whenAnswerIsWrong() throws Exception {
-        Question question = new Question();
-        question.setId(1L);
-        question.setCorrectAnswer("5");
-        question.setExplanation("Parce que 5");
+    @WithMockUser(username = EMAIL)
+    void getHint_returns200WithWrongQuestionIds() throws Exception {
+        HintDTO hint = new HintDTO();
+        hint.setWrongQuestionIds(List.of(2L, 5L));
 
-        AnswerSubmitDTO request = new AnswerSubmitDTO();
-        request.setQuestionId(1L);
-        request.setAnswer("3");
+        when(userProgressService.getHint(EMAIL, 1L, 10L)).thenReturn(hint);
 
-        when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
-
-        mockMvc.perform(post("/user-progress/1/answer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(get("/user-progress/1/steps/10/hint"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isCorrect").value(false))
-                .andExpect(jsonPath("$.userAnswer").value("3"));
+                .andExpect(jsonPath("$.wrongQuestionIds.length()").value(2))
+                .andExpect(jsonPath("$.wrongQuestionIds[0]").value(2));
     }
 
     @Test
-    void submitAnswer_isCaseInsensitive_returnsCorrect() throws Exception {
-        Question question = new Question();
-        question.setId(1L);
-        question.setCorrectAnswer("Forêt");
-        question.setExplanation("La forêt");
-
-        AnswerSubmitDTO request = new AnswerSubmitDTO();
-        request.setQuestionId(1L);
-        request.setAnswer("forêt");
-
-        when(questionRepository.findById(1L)).thenReturn(Optional.of(question));
-
-        mockMvc.perform(post("/user-progress/1/answer")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isCorrect").value(true));
-    }
-
-    @Test
-    void checkAndUnlockTreasure_returns200() throws Exception {
-        doNothing().when(userProgressService).checkAndUnlockTreasure(1L, 1L);
-
-        mockMvc.perform(post("/user-progress/1/1/check-unlock"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void getTreasureCoordinates_returns200WithCoords_whenUnlocked() throws Exception {
+    @WithMockUser(username = EMAIL)
+    void getTreasureCoordinates_returns200() throws Exception {
         CoordinateCalculationService.CalculatedCoordinates coords =
                 new CoordinateCalculationService.CalculatedCoordinates(47.725333, -1.367167);
 
-        when(userProgressService.calculateTreasureCoordinates(1L, 1L)).thenReturn(coords);
+        when(userProgressService.calculateTreasureCoordinates(EMAIL, 1L)).thenReturn(coords);
 
-        mockMvc.perform(get("/user-progress/1/1/treasure-coordinates"))
+        mockMvc.perform(get("/user-progress/1/treasure-coordinates"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.latitude").value(47.725333))
                 .andExpect(jsonPath("$.longitude").value(-1.367167));
     }
 
     @Test
-    void getTreasureCoordinates_returns500_whenTreasureLocked() throws Exception {
-        when(userProgressService.calculateTreasureCoordinates(1L, 1L))
+    @WithMockUser(username = EMAIL)
+    void getTreasureCoordinates_returns500_whenLocked() throws Exception {
+        when(userProgressService.calculateTreasureCoordinates(EMAIL, 1L))
                 .thenThrow(new RuntimeException("Treasure not yet unlocked"));
 
-        mockMvc.perform(get("/user-progress/1/1/treasure-coordinates"))
+        mockMvc.perform(get("/user-progress/1/treasure-coordinates"))
                 .andExpect(status().is5xxServerError());
     }
 
     @Test
-    void advanceStep_returns200WithUpdatedProgress() throws Exception {
-        UserProgressDTO dto = buildProgressDTO(1L, 1L, 2);
+    @WithMockUser(username = EMAIL)
+    void validateCode_returns200_whenCodeCorrect() throws Exception {
+        ValidateCodeRequest request = new ValidateCodeRequest();
+        request.setCode("ABCD1234");
 
-        doNothing().when(userProgressService).advanceStep(1L, 1L);
-        when(userProgressService.getUserProgress(1L, 1L)).thenReturn(dto);
+        doNothing().when(userProgressService).validateCode(EMAIL, 1L, "ABCD1234");
 
-        mockMvc.perform(post("/user-progress/1/1/advance-step"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.currentStep").value(2));
+        mockMvc.perform(post("/user-progress/1/validate-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = EMAIL)
+    void validateCode_returns500_whenCodeWrong() throws Exception {
+        ValidateCodeRequest request = new ValidateCodeRequest();
+        request.setCode("ZZZZZZZZ");
+
+        doThrow(new RuntimeException("Code incorrect"))
+                .when(userProgressService).validateCode(EMAIL, 1L, "ZZZZZZZZ");
+
+        mockMvc.perform(post("/user-progress/1/validate-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is5xxServerError());
     }
 }

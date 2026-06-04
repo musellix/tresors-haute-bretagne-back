@@ -17,5 +17,6 @@ public class TreasureHuntRequest {
     private Double finalLongitude;
     private String treasureImageUrl;
     private String coordinateFormula;
+    private String accessCode;
     private Boolean isActive = true;
 }
