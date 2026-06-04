@@ -9,9 +9,6 @@ Ajouter un endpoint `POST /user-progress/{huntId}/check-proximity` qui reçoit
 (formule de Haversine ou `CoordinateCalculationService`).
 
 
-### 6. Pagination sur `GET /admin/users`
-Retourne tous les utilisateurs d'un coup. Utiliser `Pageable` Spring Data.
-
 ---
 
 ## ✅ Déjà fait
@@ -24,6 +21,7 @@ Retourne tous les utilisateurs d'un coup. Utiliser `Pageable` Spring Data.
 - Tests unitaires pour tous les modules existants (avant auth/admin)
 - **Tests auth & admin** : `AuthServiceTest` (17), `AuthControllerTest` (13), `AdminServiceTest` (19) — 126 tests total, 0 échec
 - **GET admin** : `GET /admin/treasure-hunts`, `GET /admin/steps/{stepId}/dialogues`, `GET /admin/steps/{stepId}/questions`
+- **Pagination** : `GET /admin/users` → `Page<UserDTO>` (param `page`, `size`, `sort` ; défaut 20/page trié par id)
 - **Flux de jeu complet** (refonte UserProgress) :
   - `POST /user-progress/{huntId}/steps/{stepId}/submit-answers` — soumission groupée, upsert (bug #1 corrigé), avance d'étape ou débloque le trésor automatiquement
   - `GET /user-progress/{huntId}/steps/{stepId}/hint` — retourne les `questionId` incorrects/manquants

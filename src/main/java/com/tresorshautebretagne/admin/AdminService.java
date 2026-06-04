@@ -24,6 +24,8 @@ import com.tresorshautebretagne.user.User;
 import com.tresorshautebretagne.user.UserDTO;
 import com.tresorshautebretagne.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -242,10 +244,8 @@ public class AdminService {
 
     // ── Utilisateurs ─────────────────────────────────────────────────────────
 
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(mapperService::userToDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(mapperService::userToDTO);
     }
 
     @Transactional

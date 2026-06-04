@@ -3,6 +3,8 @@ package com.tresorshautebretagne.admin;
 import com.tresorshautebretagne.admin.dto.*;
 import com.tresorshautebretagne.korrigan.Korrigan;
 import com.tresorshautebretagne.korrigan.KorriganRepository;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import com.tresorshautebretagne.shared.service.MapperService;
 import com.tresorshautebretagne.theme.Theme;
 import com.tresorshautebretagne.theme.ThemeRepository;
@@ -316,11 +318,12 @@ class AdminServiceTest {
     void getAllUsers_returnsMappedList() {
         User u1 = new User(); u1.setId(1L);
         User u2 = new User(); u2.setId(2L);
+        PageRequest pageable = PageRequest.of(0, 20);
 
-        when(userRepository.findAll()).thenReturn(List.of(u1, u2));
+        when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(u1, u2)));
         when(mapperService.userToDTO(any())).thenReturn(new com.tresorshautebretagne.user.UserDTO());
 
-        assertThat(adminService.getAllUsers()).hasSize(2);
+        assertThat(adminService.getAllUsers(pageable).getContent()).hasSize(2);
     }
 
     // ── updateRole ────────────────────────────────────────────────────────────
