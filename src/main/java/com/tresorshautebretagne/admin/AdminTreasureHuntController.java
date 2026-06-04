@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -18,6 +20,11 @@ public class AdminTreasureHuntController {
     private final AdminService adminService;
 
     // ── Chasses ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/treasure-hunts")
+    public ResponseEntity<List<TreasureHuntDTO>> getAllHunts() {
+        return ResponseEntity.ok(adminService.getAllTreasureHunts());
+    }
 
     @PostMapping("/treasure-hunts")
     public ResponseEntity<TreasureHuntDTO> createHunt(@Valid @RequestBody TreasureHuntRequest request) {
@@ -63,6 +70,11 @@ public class AdminTreasureHuntController {
 
     // ── Dialogues ────────────────────────────────────────────────────────────
 
+    @GetMapping("/steps/{stepId}/dialogues")
+    public ResponseEntity<List<DialogueDTO>> getDialogues(@PathVariable Long stepId) {
+        return ResponseEntity.ok(adminService.getDialoguesByStep(stepId));
+    }
+
     @PostMapping("/steps/{stepId}/dialogues")
     public ResponseEntity<DialogueDTO> createDialogue(@PathVariable Long stepId,
                                                       @Valid @RequestBody DialogueRequest request) {
@@ -82,6 +94,11 @@ public class AdminTreasureHuntController {
     }
 
     // ── Questions ────────────────────────────────────────────────────────────
+
+    @GetMapping("/steps/{stepId}/questions")
+    public ResponseEntity<List<QuestionDTO>> getQuestions(@PathVariable Long stepId) {
+        return ResponseEntity.ok(adminService.getQuestionsByStep(stepId));
+    }
 
     @PostMapping("/steps/{stepId}/questions")
     public ResponseEntity<QuestionDTO> createQuestion(@PathVariable Long stepId,

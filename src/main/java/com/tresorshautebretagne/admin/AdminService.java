@@ -103,6 +103,12 @@ public class AdminService {
 
     // ── Chasses au trésor ────────────────────────────────────────────────────
 
+    public List<TreasureHuntDTO> getAllTreasureHunts() {
+        return treasureHuntRepository.findAll().stream()
+                .map(this::toHuntDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public TreasureHuntDTO createTreasureHunt(TreasureHuntRequest req) {
         Theme theme = themeRepository.findById(req.getThemeId())
@@ -164,6 +170,12 @@ public class AdminService {
 
     // ── Dialogues ────────────────────────────────────────────────────────────
 
+    public List<DialogueDTO> getDialoguesByStep(Long stepId) {
+        return dialogueRepository.findByStepIdOrderByDialogueOrder(stepId).stream()
+                .map(mapperService::dialogueToDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public DialogueDTO createDialogue(Long stepId, DialogueRequest req) {
         Step step = stepRepository.findById(stepId)
@@ -198,6 +210,12 @@ public class AdminService {
     }
 
     // ── Questions ────────────────────────────────────────────────────────────
+
+    public List<QuestionDTO> getQuestionsByStep(Long stepId) {
+        return questionRepository.findByStepIdOrderByQuestionOrder(stepId).stream()
+                .map(mapperService::questionToDTO)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public QuestionDTO createQuestion(Long stepId, QuestionRequest req) {
