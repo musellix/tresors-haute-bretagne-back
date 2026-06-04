@@ -1,7 +1,9 @@
 package com.tresorshautebretagne.userProgress;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tresorshautebretagne.config.JwtService;
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;
+import com.tresorshautebretagne.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,6 +42,8 @@ class UserProgressControllerTest {
     @Autowired ObjectMapper objectMapper;
 
     @MockBean UserProgressService userProgressService;
+    @MockBean JwtService jwtService;
+    @MockBean UserRepository userRepository;
 
     private static final String EMAIL = "user@test.com";
 

@@ -1,5 +1,6 @@
 package com.tresorshautebretagne.user;
 
+import com.tresorshautebretagne.config.JwtService;
 import com.tresorshautebretagne.shared.service.MapperService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ class UserControllerTest {
 
     @MockBean UserRepository userRepository;
     @MockBean MapperService mapperService;
+    @MockBean JwtService jwtService;
 
     private User buildUser(Long id) {
         User u = new User();

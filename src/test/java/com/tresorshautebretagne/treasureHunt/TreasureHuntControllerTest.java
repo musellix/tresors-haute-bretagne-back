@@ -1,6 +1,8 @@
 package com.tresorshautebretagne.treasureHunt;
 
+import com.tresorshautebretagne.config.JwtService;
 import com.tresorshautebretagne.treasureHunt.step.StepDTO;
+import com.tresorshautebretagne.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -20,6 +22,8 @@ class TreasureHuntControllerTest {
     @Autowired MockMvc mockMvc;
 
     @MockBean TreasureHuntService treasureHuntService;
+    @MockBean JwtService jwtService;
+    @MockBean UserRepository userRepository;
 
     private TreasureHuntDTO buildDTO(Long id) {
         TreasureHuntDTO dto = new TreasureHuntDTO();

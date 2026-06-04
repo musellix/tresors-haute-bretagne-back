@@ -1,7 +1,9 @@
 package com.tresorshautebretagne.theme;
 
+import com.tresorshautebretagne.config.JwtService;
 import com.tresorshautebretagne.korrigan.Korrigan;
 import com.tresorshautebretagne.shared.service.MapperService;
+import com.tresorshautebretagne.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -23,6 +25,8 @@ class ThemeControllerTest {
 
     @MockBean ThemeRepository themeRepository;
     @MockBean MapperService mapperService;
+    @MockBean JwtService jwtService;
+    @MockBean UserRepository userRepository;
 
     private ThemeDTO buildDTO(Long id) {
         ThemeDTO dto = new ThemeDTO();

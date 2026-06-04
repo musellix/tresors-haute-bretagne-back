@@ -26,15 +26,6 @@ spring:
       data-locations: classpath:data.sql
       encoding: UTF-8
 
-server:
-  port: 8080
-  servlet:
-    context-path: /api
-  error:
-    include-message: always
-    include-binding-errors: always
-
-spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -47,6 +38,14 @@ spring:
           auth: true
           starttls:
             enable: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
 
 app:
   jwt:

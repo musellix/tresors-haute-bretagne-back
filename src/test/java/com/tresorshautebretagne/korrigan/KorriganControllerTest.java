@@ -1,9 +1,11 @@
 package com.tresorshautebretagne.korrigan;
 
+import com.tresorshautebretagne.config.JwtService;
 import com.tresorshautebretagne.shared.service.MapperService;
 import com.tresorshautebretagne.theme.Theme;
 import com.tresorshautebretagne.theme.ThemeDTO;
 import com.tresorshautebretagne.theme.ThemeRepository;
+import com.tresorshautebretagne.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -26,6 +28,8 @@ class KorriganControllerTest {
     @MockBean KorriganRepository korriganRepository;
     @MockBean ThemeRepository themeRepository;
     @MockBean MapperService mapperService;
+    @MockBean JwtService jwtService;
+    @MockBean UserRepository userRepository;
 
     private KorriganDTO buildDTO(Long id) {
         KorriganDTO dto = new KorriganDTO();
