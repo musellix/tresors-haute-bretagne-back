@@ -8,8 +8,6 @@ Ajouter un endpoint `POST /user-progress/{huntId}/check-proximity` qui reçoit
 `{ latitude, longitude }` et vérifie la distance par rapport à `Step.radiusMeters`
 (formule de Haversine ou `CoordinateCalculationService`).
 
-### 5. Tests auth & admin
-Aucun test pour `AuthService`, `AuthController`, `AdminService`. À écrire.
 
 ### 6. Pagination sur `GET /admin/users`
 Retourne tous les utilisateurs d'un coup. Utiliser `Pageable` Spring Data.
@@ -24,6 +22,7 @@ Retourne tous les utilisateurs d'un coup. Utiliser `Pageable` Spring Data.
 - Spring Security + JWT (7 jours) + refresh token rotatif (90 jours)
 - CORS, GlobalExceptionHandler, BCrypt
 - Tests unitaires pour tous les modules existants (avant auth/admin)
+- **Tests auth & admin** : `AuthServiceTest` (17), `AuthControllerTest` (13), `AdminServiceTest` (19) — 126 tests total, 0 échec
 - **GET admin** : `GET /admin/treasure-hunts`, `GET /admin/steps/{stepId}/dialogues`, `GET /admin/steps/{stepId}/questions`
 - **Flux de jeu complet** (refonte UserProgress) :
   - `POST /user-progress/{huntId}/steps/{stepId}/submit-answers` — soumission groupée, upsert (bug #1 corrigé), avance d'étape ou débloque le trésor automatiquement
