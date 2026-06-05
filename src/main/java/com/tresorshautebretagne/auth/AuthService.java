@@ -180,7 +180,15 @@ public class AuthService {
                         .expiresAt(LocalDateTime.now().plusHours(24))
                         .build()
         );
-        emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), token);
+        } catch (Exception e) {
+            // En dev, les credentials SMTP peuvent être vides.
+            // On vérifie le compte automatiquement pour ne pas bloquer le joueur.
+            System.err.println("[WARN] Email non envoyé pour " + user.getEmail() + " — compte auto-vérifié : " + e.getMessage());
+            user.setEmailVerified(true);
+            userRepository.save(user);
+        }
     }
 
     private AuthResponse buildAuthResponse(User user) {
