@@ -41,6 +41,8 @@ public class UserProgress {
 
     private LocalDateTime completedAt;
 
+    private LocalDateTime firstCompletedAt;
+
     private LocalDateTime updatedAt;
 
     @PreUpdate

@@ -44,11 +44,20 @@ public class UserProgressService {
                 .findByUserIdAndTreasureHuntId(user.getId(), huntId)
                 .orElse(new UserProgress());
 
+        // Sauvegarder firstCompletedAt si déjà défini (ne jamais l'effacer)
+        LocalDateTime existingFirstCompleted = progress.getFirstCompletedAt();
+
         progress.setUser(user);
         progress.setTreasureHunt(hunt);
         progress.setCurrentStep(1);
         progress.setIsCompleted(false);
         progress.setIsTreasureUnlocked(false);
+        progress.setCompletedAt(null);
+
+        // Restaurer firstCompletedAt
+        if (existingFirstCompleted != null) {
+            progress.setFirstCompletedAt(existingFirstCompleted);
+        }
 
         return mapperService.userProgressToDTO(userProgressRepository.save(progress));
     }
@@ -191,6 +200,12 @@ public class UserProgressService {
 
         progress.setIsCompleted(true);
         progress.setCompletedAt(LocalDateTime.now());
+
+        // Sauvegarder la première complétion (seulement si c'est la première fois)
+        if (progress.getFirstCompletedAt() == null) {
+            progress.setFirstCompletedAt(LocalDateTime.now());
+        }
+
         userProgressRepository.save(progress);
     }
 

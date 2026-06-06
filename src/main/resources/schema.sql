@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS user_progress (
     is_treasure_unlocked BOOLEAN NOT NULL DEFAULT false,
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
+    first_completed_at TIMESTAMP,
     updated_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (treasure_hunt_id) REFERENCES treasure_hunts(id),

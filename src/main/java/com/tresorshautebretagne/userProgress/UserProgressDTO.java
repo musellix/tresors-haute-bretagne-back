@@ -16,4 +16,5 @@ public class UserProgressDTO {
     private Boolean isTreasureUnlocked;
     private String startedAt;
     private String completedAt;
+    private String firstCompletedAt;
 }
