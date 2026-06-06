@@ -1,5 +1,31 @@
 # Prochaines étapes — Backend
 
+## 🐛 BUGS À CORRIGER EN PRIORITÉ
+
+### Dialogues affichés en double
+**Symptôme** : Les dialogues semblent tous en double, ou il faut cliquer deux fois sur "Suivant" à chaque fois
+**Contexte** :
+- Après nettoyage des dialogues dupliqués en BDD (gardé uniquement MIN(id) pour chaque combinaison step_id/dialogue_order/text/korrigan_id)
+- Backend modifié pour trier les dialogues par `dialogueOrder` dans MapperService.java (lignes 57-59)
+- Frontend modifié pour recharger la progression après "Recommencer" (play.tsx ligne 191)
+- Les dialogues sont bien dans l'ordre dans la BDD (vérification faite)
+
+**À vérifier** :
+1. Est-ce que l'API retourne vraiment les dialogues triés correctement ?
+2. Y a-t-il encore des doublons cachés dans la BDD ?
+3. Le compteur de dialogues dans DialogueView affiche-t-il le bon nombre total ?
+4. L'index dialogueIndex se comporte-t-il correctement dans play.tsx ?
+5. Les dialogues sont-ils dupliqués côté React (re-render ou state mal géré) ?
+
+**Commandes debug utiles** :
+```bash
+# Vérifier les dialogues pour step 1
+docker exec -i tresors-postgres psql -U postgres -d tresors_db -c "SELECT d.id, d.dialogue_order, LEFT(d.text, 60) FROM dialogues d JOIN steps s ON d.step_id = s.id WHERE s.treasure_hunt_id = 1 AND s.step_order = 1 ORDER BY d.dialogue_order;"
+
+# Tester l'API directement
+curl http://localhost:8080/api/treasure-hunts/1/steps -H "Authorization: Bearer <token>"
+```
+
 ## ✅ Déjà fait
 - Entités + repositories + controllers GET (korrigans, thèmes, chasses, étapes, dialogues, questions, users, user-progress)
 - Auth : register / login / Google OAuth / vérification email / refresh token / logout

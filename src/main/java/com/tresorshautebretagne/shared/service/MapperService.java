@@ -18,6 +18,7 @@ import com.tresorshautebretagne.userProgress.userAnswer.UserAnswer;
 import com.tresorshautebretagne.userProgress.userAnswer.UserAnswerDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,10 +55,12 @@ public class MapperService {
         dto.setRadiusMeters(step.getRadiusMeters());
         
         dto.setDialogues(step.getDialogues().stream()
+                .sorted(Comparator.comparing(Dialogue::getDialogueOrder))
                 .map(this::dialogueToDTO)
                 .collect(Collectors.toList()));
-        
+
         dto.setQuestions(step.getQuestions().stream()
+                .sorted(Comparator.comparing(Question::getQuestionOrder))
                 .map(this::questionToDTO)
                 .collect(Collectors.toList()));
         
