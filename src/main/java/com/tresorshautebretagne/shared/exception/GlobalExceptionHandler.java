@@ -37,7 +37,10 @@ public class GlobalExceptionHandler {
             case "EMAIL_ALREADY_VERIFIED"    -> error(HttpStatus.CONFLICT,   "Votre email est déjà vérifié");
             case "INVALID_REFRESH_TOKEN"     -> error(HttpStatus.UNAUTHORIZED,"Token de rafraîchissement invalide");
             case "REFRESH_TOKEN_EXPIRED"     -> error(HttpStatus.UNAUTHORIZED,"Session expirée, veuillez vous reconnecter");
-            default                          -> error(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur est survenue");
+            default                          -> {
+                e.printStackTrace();
+                yield error(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur est survenue");
+            }
         };
     }
 

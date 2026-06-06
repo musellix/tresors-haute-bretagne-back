@@ -1,11 +1,11 @@
 package com.tresorshautebretagne.userProgress;
 
 import com.tresorshautebretagne.shared.service.CoordinateCalculationService;
+import com.tresorshautebretagne.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,59 +19,59 @@ public class UserProgressController {
 
     @PostMapping("/{huntId}/start")
     public ResponseEntity<UserProgressDTO> startTreasureHunt(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId) {
-        return ResponseEntity.ok(userProgressService.startTreasureHunt(principal.getUsername(), huntId));
+        return ResponseEntity.ok(userProgressService.startTreasureHunt(user.getEmail(), huntId));
     }
 
     @GetMapping
     public ResponseEntity<List<UserProgressDTO>> getUserProgresses(
-            @AuthenticationPrincipal UserDetails principal) {
-        return ResponseEntity.ok(userProgressService.getUserProgresses(principal.getUsername()));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userProgressService.getUserProgresses(user.getEmail()));
     }
 
     @GetMapping("/{huntId}")
     public ResponseEntity<UserProgressDTO> getUserProgress(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId) {
-        return ResponseEntity.ok(userProgressService.getUserProgress(principal.getUsername(), huntId));
+        return ResponseEntity.ok(userProgressService.getUserProgress(user.getEmail(), huntId));
     }
 
     @PostMapping("/{huntId}/steps/{stepId}/submit-answers")
     public ResponseEntity<SubmitAnswersResultDTO> submitAnswers(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId,
             @PathVariable Long stepId,
             @RequestBody SubmitAnswersRequest request) {
         return ResponseEntity.ok(userProgressService.submitAnswers(
-                principal.getUsername(), huntId, stepId, request.getAnswers()));
+                user.getEmail(), huntId, stepId, request.getAnswers()));
     }
 
     @PostMapping("/{huntId}/steps/{stepId}/check-proximity")
     public ResponseEntity<ProximityCheckResult> checkProximity(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId,
             @PathVariable Long stepId,
             @Valid @RequestBody ProximityCheckRequest request) {
         return ResponseEntity.ok(userProgressService.checkProximity(
-                principal.getUsername(), huntId, stepId,
+                user.getEmail(), huntId, stepId,
                 request.getLatitude(), request.getLongitude()));
     }
 
     @GetMapping("/{huntId}/steps/{stepId}/hint")
     public ResponseEntity<HintDTO> getHint(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId,
             @PathVariable Long stepId) {
-        return ResponseEntity.ok(userProgressService.getHint(principal.getUsername(), huntId, stepId));
+        return ResponseEntity.ok(userProgressService.getHint(user.getEmail(), huntId, stepId));
     }
 
     @GetMapping("/{huntId}/treasure-coordinates")
     public ResponseEntity<TreasureCoordinatesDTO> getTreasureCoordinates(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId) {
         CoordinateCalculationService.CalculatedCoordinates coords =
-                userProgressService.calculateTreasureCoordinates(principal.getUsername(), huntId);
+                userProgressService.calculateTreasureCoordinates(user.getEmail(), huntId);
         TreasureCoordinatesDTO dto = new TreasureCoordinatesDTO();
         dto.setLatitude(coords.getLatitude());
         dto.setLongitude(coords.getLongitude());
@@ -80,10 +80,10 @@ public class UserProgressController {
 
     @PostMapping("/{huntId}/validate-code")
     public ResponseEntity<Void> validateCode(
-            @AuthenticationPrincipal UserDetails principal,
+            @AuthenticationPrincipal User user,
             @PathVariable Long huntId,
             @RequestBody ValidateCodeRequest request) {
-        userProgressService.validateCode(principal.getUsername(), huntId, request.getCode());
+        userProgressService.validateCode(user.getEmail(), huntId, request.getCode());
         return ResponseEntity.ok().build();
     }
 }
