@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class DialogueDTO {
     private Long id;
     private Integer dialogueOrder;
+    private Integer contentOrder;
     private String text;
     private String audioUrl;
     private Object korrigan;

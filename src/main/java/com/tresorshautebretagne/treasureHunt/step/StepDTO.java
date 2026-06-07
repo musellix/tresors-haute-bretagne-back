@@ -21,4 +21,5 @@ public class StepDTO {
     private Integer radiusMeters;
     private List<DialogueDTO> dialogues;
     private List<QuestionDTO> questions;
+    private List<StepContentItemDTO> content; // Unified content list (dialogues + questions ordered by contentOrder)
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class QuestionDTO {
     private Long id;
     private Integer questionOrder;
+    private Integer contentOrder;
     private String questionText;
     private String questionType;
     private String explanation;

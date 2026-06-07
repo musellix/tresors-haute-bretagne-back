@@ -35,6 +35,9 @@ public class Question {
     private Integer questionOrder;
 
     @Column(nullable = false)
+    private Integer contentOrder;
+
+    @Column(nullable = false)
     private String questionType = "SHORT_TEXT";
 
     @Column(nullable = false, updatable = false)

@@ -33,6 +33,9 @@ public class Dialogue {
     @Column(nullable = false)
     private Integer dialogueOrder;
 
+    @Column(nullable = false)
+    private Integer contentOrder;
+
     private String audioUrl;
 
     @Column(nullable = false, updatable = false)

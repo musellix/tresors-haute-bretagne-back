@@ -2,6 +2,7 @@ package com.tresorshautebretagne.shared.service;
 
 import com.tresorshautebretagne.treasureHunt.step.Step;
 import com.tresorshautebretagne.treasureHunt.step.StepDTO;
+import com.tresorshautebretagne.treasureHunt.step.StepContentItemDTO;
 import com.tresorshautebretagne.treasureHunt.dialogue.Dialogue;
 import com.tresorshautebretagne.treasureHunt.dialogue.DialogueDTO;
 import com.tresorshautebretagne.treasureHunt.question.Question;
@@ -18,8 +19,11 @@ import com.tresorshautebretagne.userProgress.userAnswer.UserAnswer;
 import com.tresorshautebretagne.userProgress.userAnswer.UserAnswerDTO;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MapperService {
@@ -54,16 +58,25 @@ public class MapperService {
         dto.setLongitude(step.getLongitude());
         dto.setRadiusMeters(step.getRadiusMeters());
         
-        dto.setDialogues(step.getDialogues().stream()
+        List<DialogueDTO> dialogueDTOs = step.getDialogues().stream()
                 .sorted(Comparator.comparing(Dialogue::getDialogueOrder))
                 .map(this::dialogueToDTO)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        dto.setDialogues(dialogueDTOs);
 
-        dto.setQuestions(step.getQuestions().stream()
+        List<QuestionDTO> questionDTOs = step.getQuestions().stream()
                 .sorted(Comparator.comparing(Question::getQuestionOrder))
                 .map(this::questionToDTO)
-                .collect(Collectors.toList()));
-        
+                .collect(Collectors.toList());
+        dto.setQuestions(questionDTOs);
+
+        // Create unified content list ordered by contentOrder
+        List<StepContentItemDTO> content = new ArrayList<>();
+        dialogueDTOs.forEach(d -> content.add(StepContentItemDTO.fromDialogue(d)));
+        questionDTOs.forEach(q -> content.add(StepContentItemDTO.fromQuestion(q)));
+        content.sort(Comparator.comparing(StepContentItemDTO::getContentOrder));
+        dto.setContent(content);
+
         return dto;
     }
 
@@ -71,6 +84,7 @@ public class MapperService {
         DialogueDTO dto = new DialogueDTO();
         dto.setId(dialogue.getId());
         dto.setDialogueOrder(dialogue.getDialogueOrder());
+        dto.setContentOrder(dialogue.getContentOrder());
         dto.setText(dialogue.getText());
         dto.setAudioUrl(dialogue.getAudioUrl());
         dto.setKorrigan(korriganToDTO(dialogue.getKorrigan()));
@@ -81,6 +95,7 @@ public class MapperService {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(question.getId());
         dto.setQuestionOrder(question.getQuestionOrder());
+        dto.setContentOrder(question.getContentOrder());
         dto.setQuestionText(question.getQuestionText());
         dto.setQuestionType(question.getQuestionType());
         dto.setExplanation(question.getExplanation());
