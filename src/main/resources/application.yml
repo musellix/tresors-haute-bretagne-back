@@ -21,7 +21,7 @@ spring:
   
   sql:
     init:
-      mode: always
+      mode: never
       platform: postgresql
       data-locations: classpath:data.sql
       encoding: UTF-8

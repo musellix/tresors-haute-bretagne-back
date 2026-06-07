@@ -158,7 +158,18 @@ public class UserProgressService {
         User user = findUserByEmail(userEmail);
         UserProgress progress = userProgressRepository
                 .findByUserIdAndTreasureHuntId(user.getId(), huntId)
-                .orElseThrow(() -> new RuntimeException("No progress found"));
+                .orElseGet(() -> {
+                    // Create new progress if it doesn't exist
+                    TreasureHunt hunt = treasureHuntRepository.findById(huntId)
+                            .orElseThrow(() -> new RuntimeException("Treasure hunt not found"));
+                    UserProgress newProgress = new UserProgress();
+                    newProgress.setUser(user);
+                    newProgress.setTreasureHunt(hunt);
+                    newProgress.setCurrentStep(1);
+                    newProgress.setIsCompleted(false);
+                    newProgress.setIsTreasureUnlocked(false);
+                    return userProgressRepository.save(newProgress);
+                });
         return mapperService.userProgressToDTO(progress);
     }
 
