@@ -94,22 +94,25 @@ public class UserProgressService {
 
         boolean allCorrect = allQuestionsAnsweredCorrectly(user.getId(), stepId);
 
-        if (allCorrect) {
-            UserProgress progress = userProgressRepository
-                    .findByUserIdAndTreasureHuntId(user.getId(), huntId)
-                    .orElseThrow(() -> new RuntimeException("No progress found"));
+        UserProgress progress = userProgressRepository
+                .findByUserIdAndTreasureHuntId(user.getId(), huntId)
+                .orElseThrow(() -> new RuntimeException("No progress found"));
 
-            List<Step> allSteps = stepRepository.findByTreasureHuntIdOrderByStepOrder(huntId);
-            boolean isLastStep = allSteps.stream()
-                    .max(Comparator.comparingInt(Step::getStepOrder))
-                    .map(s -> s.getId().equals(stepId))
-                    .orElse(false);
+        List<Step> allSteps = stepRepository.findByTreasureHuntIdOrderByStepOrder(huntId);
+        boolean isLastStep = allSteps.stream()
+                .max(Comparator.comparingInt(Step::getStepOrder))
+                .map(s -> s.getId().equals(stepId))
+                .orElse(false);
 
-            if (isLastStep) {
+        if (isLastStep) {
+            // Dernière étape : déverrouille le trésor seulement si TOUTES les réponses du parcours sont correctes
+            if (allHuntQuestionsAnsweredCorrectly(user.getId(), huntId)) {
                 progress.setIsTreasureUnlocked(true);
-            } else {
-                progress.setCurrentStep(progress.getCurrentStep() + 1);
+                userProgressRepository.save(progress);
             }
+        } else {
+            // Étapes intermédiaires : avancer toujours, même si les réponses sont fausses
+            progress.setCurrentStep(progress.getCurrentStep() + 1);
             userProgressRepository.save(progress);
         }
 
@@ -229,6 +232,11 @@ public class UserProgressService {
                 userAnswerRepository.findFirstByUserIdAndQuestionId(userId, q.getId())
                         .map(UserAnswer::getIsCorrect)
                         .orElse(false));
+    }
+
+    private boolean allHuntQuestionsAnsweredCorrectly(Long userId, Long huntId) {
+        List<Step> allSteps = stepRepository.findByTreasureHuntIdOrderByStepOrder(huntId);
+        return allSteps.stream().allMatch(step -> allQuestionsAnsweredCorrectly(userId, step.getId()));
     }
 
     private int haversineMeters(double lat1, double lon1, double lat2, double lon2) {

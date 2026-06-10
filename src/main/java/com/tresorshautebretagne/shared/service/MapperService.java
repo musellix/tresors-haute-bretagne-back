@@ -87,7 +87,7 @@ public class MapperService {
         dto.setContentOrder(dialogue.getContentOrder());
         dto.setText(dialogue.getText());
         dto.setAudioUrl(dialogue.getAudioUrl());
-        dto.setKorrigan(korriganToDTO(dialogue.getKorrigan()));
+        dto.setKorrigan(dialogue.getKorrigan() != null ? korriganToDTO(dialogue.getKorrigan()) : null);
         return dto;
     }
 

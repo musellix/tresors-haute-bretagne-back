@@ -1,6 +1,9 @@
 -- Import du parcours "Au bonheur des dames"
 -- Ce script insère le parcours complet avec dialogues et questions entrelacés
 
+-- korrigan_id nullable pour les encarts info (dialogues sans korrigan)
+ALTER TABLE dialogues ALTER COLUMN korrigan_id DROP NOT NULL;
+
 -- Insérer le thème et le korrigan (si pas déjà présents)
 INSERT INTO korrigans (id, name, description, image_url, created_at) VALUES
 (1, 'Queen Aman', 'Guide spirituelle des trésors de Haute-Bretagne', null, CURRENT_TIMESTAMP)
@@ -14,8 +17,9 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO treasure_hunts (id, title, description, theme_id, final_latitude, final_longitude, treasure_image_url, is_active, access_code, created_at) VALUES
 (1, 'Au bonheur des dames', 'Découvrez Langon à travers des histoires de femmes et des monuments qui évoquent la vie et le passé de ce charmant petit bourg.', 1, 47.7216500, -1.8522833, null, true, 'K7M9P2X4', CURRENT_TIMESTAMP);
 
--- Insérer les étapes
+-- Insérer les étapes (step_order 0 = préambule affiché sur la fiche, 1-5 = étapes jouées)
 INSERT INTO steps (id, treasure_hunt_id, step_order, title, description, latitude, longitude, radius_meters, created_at) VALUES
+(6, 1, 0, 'Préambule', 'Introduction au parcours', 47.7205000, -1.8488833, 0, CURRENT_TIMESTAMP),
 (1, 1, 1, 'Départ', 'Point de départ près de l''église', 47.7205000, -1.8488833, 50, CURRENT_TIMESTAMP),
 (2, 1, 2, 'Agathe, Pierre et Paul', 'La chapelle Sainte-Agathe et l''église', 47.7206667, -1.8493333, 50, CURRENT_TIMESTAMP),
 (3, 1, 3, 'Le lavoir', 'Rendez-vous avec les lavandières', 47.7189833, -1.8494833, 50, CURRENT_TIMESTAMP),
@@ -23,21 +27,25 @@ INSERT INTO steps (id, treasure_hunt_id, step_order, title, description, latitud
 (5, 1, 5, 'La Cache', 'Le trésor final', 47.7216500, -1.8522833, 50, CURRENT_TIMESTAMP);
 
 -- ========================================
--- ÉTAPE 1 : DÉPART
+-- ÉTAPE 0 : PRÉAMBULE (affiché sur la fiche parcours, pas dans le jeu)
 -- ========================================
--- 6 dialogues seulement (pas de questions)
 INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order, created_at) VALUES
-(1, 1, 'Bonjour tout le monde ! Pour cette chasse aux trésors, direction Langon, commune située au sud de l''Ille-et-Vilaine en Pays de Redon…. Là-bas pas de château fort, ni de bataille à vous raconter mais plutôt des histoires de femmes à travers des monuments et des sites qui évoquent la vie et le passé de ce charmant petit bourg labellisé Commune du Patrimoine Rural de Bretagne.', 1, 1, CURRENT_TIMESTAMP),
-(1, 1, 'Un cache féministe peut-être ?', 2, 2, CURRENT_TIMESTAMP),
-(1, 1, 'Pas forcément, mais bien souvent on oublie le rôle joué par les femmes au cours de l''histoire ou même tout simplement dans la vie quotidienne. Si tu veux en savoir plus, tu n''as qu''à me suivre….', 3, 3, CURRENT_TIMESTAMP),
-(1, 1, 'Le mieux est de vous garer sur le petit parking près de l''église. Il vous permettra de rejoindre facilement votre véhicule à la fin du circuit. Dis-moi, Queen Aman, quelle est la première femme que nous allons rencontrer ?', 4, 4, CURRENT_TIMESTAMP),
-(1, 1, 'Elle se prénomme Agathe… et elle sera accompagnée.', 5, 5, CURRENT_TIMESTAMP),
-(1, 1, 'Ah, zut !', 6, 6, CURRENT_TIMESTAMP);
+(6, 1, 'Bonjour tout le monde ! Pour cette chasse aux trésors, direction Langon, commune située au sud de l''Ille-et-Vilaine en Pays de Redon…. Là-bas pas de château fort, ni de bataille à vous raconter mais plutôt des histoires de femmes à travers des monuments et des sites qui évoquent la vie et le passé de ce charmant petit bourg labellisé Commune du Patrimoine Rural de Bretagne.', 1, 1, CURRENT_TIMESTAMP),
+(6, 1, 'Un cache féministe peut-être ?', 2, 2, CURRENT_TIMESTAMP),
+(6, 1, 'Pas forcément, mais bien souvent on oublie le rôle joué par les femmes au cours de l''histoire ou même tout simplement dans la vie quotidienne. Si tu veux en savoir plus, tu n''as qu''à me suivre….', 3, 3, CURRENT_TIMESTAMP);
+
+-- ========================================
+-- ÉTAPE 1 : DÉPART (point GPS parking — dialogues post-carte)
+-- ========================================
+INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order, created_at) VALUES
+(1, 1, 'Le mieux est de vous garer sur le petit parking près de l''église. Il vous permettra de rejoindre facilement votre véhicule à la fin du circuit. Dis-moi, Queen Aman, quelle est la première femme que nous allons rencontrer ?', 1, 1, CURRENT_TIMESTAMP),
+(1, 1, 'Elle se prénomme Agathe… et elle sera accompagnée.', 2, 2, CURRENT_TIMESTAMP),
+(1, 1, 'Ah, zut !', 3, 3, CURRENT_TIMESTAMP);
 
 -- ========================================
 -- ÉTAPE 2 : AGATHE, PIERRE ET PAUL
 -- ========================================
--- Dialogues + 2 questions entrelacées
+-- Dialogues + encarts info + 2 questions entrelacées (korrigan_id nullable pour les encarts)
 INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order, created_at) VALUES
 (2, 1, 'Mon cher Korry Gan, ici tu risques fort de te casser le nez. Agathe est le nom donné à cette jolie petite chapelle située juste de l''autre côté de la rue.', 1, 1, CURRENT_TIMESTAMP),
 (2, 1, 'La chapelle Ste Agathe… on dirait une église miniature !', 2, 2, CURRENT_TIMESTAMP),
@@ -45,25 +53,33 @@ INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order
 (2, 1, 'Elle n''a pas pris une ride !', 4, 4, CURRENT_TIMESTAMP),
 (2, 1, 'Elle est placée sous la protection de Ste Agathe, patronne des nourrices. Il faut savoir que Ste Agathe avait été torturée par les Romains, les seins mutilés puis guérie par St-Pierre qui était apparu dans son cachot. D''après une ancienne tradition, les mères et les nourrices en manque de lait invoquaient Ste Agathe afin de pouvoir allaiter leur enfant. Pour cela, elles devaient effectuer sept fois le tour de la chapelle en priant. Par mimétisme, ce pèlerinage s''est étendu à toutes les femmes ayant des problèmes de santé liés aux seins.', 5, 5, CURRENT_TIMESTAMP),
 (2, 1, 'Ah oui ? Comme ce pays a parfois des coutumes bien étranges…', 6, 6, CURRENT_TIMESTAMP),
-(2, 1, 'Cette chapelle abrite un véritable trésor dans le cul-de-four de l''abside (Un cul-de-four est une voûte en forme de quart de sphère, rappelant la forme du four à pain). Il s''agit d''une fresque gallo-romaine datée de la fin du IIè-début du IIIè siècle représentant Vénus sortant des eaux.', 7, 7, CURRENT_TIMESTAMP);
+(2, 1, 'Cette chapelle abrite un véritable trésor dans le cul-de-four de l''abside (Un cul-de-four est une voûte en forme de quart de sphère, rappelant la forme du four à pain). Il s''agit d''une fresque gallo-romaine datée de la fin du IIè-début du IIIè siècle représentant Vénus sortant des eaux.', 7, 7, CURRENT_TIMESTAMP),
+-- Encart info (korrigan_id = NULL → rendu comme info box dans l''appli)
+(2, NULL, 'Des visites guidées de la chapelle Ste Agathe sont possibles sur RDV. Renseignements auprès de l''Association Arcades 02 99 08 63 93 – email arcades.langon@laposte.net', 12, 8, CURRENT_TIMESTAMP),
+-- Intro énigme
+(2, 1, 'Une petite énigme ça vous dit ?', 13, 9, CURRENT_TIMESTAMP);
 
--- Question 1 insérée après dialogue 7 (content_order 8)
+-- Question 1 (content_order 10)
 INSERT INTO questions (step_id, question_text, correct_answer, explanation, question_order, content_order, question_type, created_at) VALUES
-(2, 'En quelle année la chapelle Sainte-Agathe a-t-elle été classée Monument Historique ? Repérez le chiffre des centaines et ôtez-lui la valeur de celui des milles.', '8', 'La chapelle a été classée en 1840. Centaines = 8, Milles = 1, donc 8 - 1 = 7. Mais attendez... il faut juste le chiffre des centaines moins celui des milles : 8 - 1 = 7. Ah non, on garde juste le chiffre des centaines et on ôte le chiffre des milles : donc A = 8 - 0 = 8 (car 1840, milles=1, centaines=8, donc 8-0=8... en fait centaines-milles = 8-1=7, mais si on parle de la VALEUR alors c''est 800-1000... Simplifions : A = 8', 1, 8, 'SHORT_TEXT', CURRENT_TIMESTAMP);
+(2, 'En quelle année la chapelle Sainte-Agathe a-t-elle été classée Monument Historique ? Repérez le chiffre des centaines et ôtez-lui la valeur de celui des milles.', '8', 'La chapelle a été classée en 1840. Chiffre des centaines = 8, chiffre des milles = 1, donc A = 8 - 1 = 7. Note: la valeur utilisée dans les coordonnées est A = 8.', 1, 10, 'SHORT_TEXT', CURRENT_TIMESTAMP);
 
 -- Suite des dialogues
 INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order, created_at) VALUES
-(2, 1, 'Direction à présent l''église St-Pierre et St-Paul. Pour cela il vous suffit de traverser prudemment la route.', 8, 9, CURRENT_TIMESTAMP),
-(2, 1, 'Décidément je ne sais plus à quel saint me vouer !', 9, 10, CURRENT_TIMESTAMP),
-(2, 1, 'Observez-la bien ! Elle servira de base à notre prochaine énigme. De construction romane, elle a subi plusieurs transformations parmi lesquelles la construction d''un ensemble de clochetons qui personnalise sa silhouette de manière originale. Cela symbolise le christ et ses apôtres. Cette église est le seul ensemble roman conservé dans son intégralité en Ille et Vilaine.', 10, 11, CURRENT_TIMESTAMP);
+(2, 1, 'Direction à présent l''église St-Pierre et St-Paul. Pour cela il vous suffit de traverser prudemment la route.', 8, 11, CURRENT_TIMESTAMP),
+(2, 1, 'Décidément je ne sais plus à quel saint me vouer !', 9, 12, CURRENT_TIMESTAMP),
+(2, 1, 'Observez-la bien ! Elle servira de base à notre prochaine énigme. De construction romane, elle a subi plusieurs transformations parmi lesquelles la construction d''un ensemble de clochetons qui personnalise sa silhouette de manière originale. Cela symbolise le christ et ses apôtres. Cette église est le seul ensemble roman conservé dans son intégralité en Ille et Vilaine.', 10, 13, CURRENT_TIMESTAMP),
+-- Encart info avant question 2 (korrigan_id = NULL → info box)
+(2, NULL, 'Depuis 2013, cet édifice fait l''objet d''importants travaux de restauration et est malheureusement fermé au public pour l''instant.', 14, 14, CURRENT_TIMESTAMP),
+-- Intro énigme 2
+(2, 1, 'Encore une petite énigme ça vous dit ?', 15, 15, CURRENT_TIMESTAMP);
 
--- Question 2 à la fin (content_order 12)
+-- Question 2 (content_order 16)
 INSERT INTO questions (step_id, question_text, correct_answer, explanation, question_order, content_order, question_type, created_at) VALUES
-(2, 'Combien de clochetons entourent le clocher de l''église ? Additionnez tous les chiffres ensemble pour n''en obtenir qu''un seul.', '12', 'Il y a 12 apôtres, donc 12 clochetons. 1 + 2 = 3. Donc B = 3', 2, 12, 'SHORT_TEXT', CURRENT_TIMESTAMP);
+(2, 'Combien de clochetons entourent le clocher de l''église ? Additionnez tous les chiffres ensemble pour n''en obtenir qu''un seul.', '3', 'Il y a 12 clochetons (autant que d''apôtres). 1 + 2 = 3. Donc B = 3.', 2, 16, 'SHORT_TEXT', CURRENT_TIMESTAMP);
 
 -- Dernier dialogue
 INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order, created_at) VALUES
-(2, 1, 'Contournez l''église et rendez-vous « rue Mondésir »', 11, 13, CURRENT_TIMESTAMP);
+(2, 1, 'Contournez l''église et rendez-vous « rue Mondésir »', 11, 17, CURRENT_TIMESTAMP);
 
 -- ========================================
 -- ÉTAPE 3 : LE LAVOIR
@@ -114,6 +130,6 @@ INSERT INTO dialogues (step_id, korrigan_id, text, dialogue_order, content_order
 SELECT setval('korrigans_id_seq', (SELECT MAX(id) FROM korrigans));
 SELECT setval('themes_id_seq', (SELECT MAX(id) FROM themes));
 SELECT setval('treasure_hunts_id_seq', (SELECT MAX(id) FROM treasure_hunts));
-SELECT setval('steps_id_seq', (SELECT MAX(id) FROM steps));
+SELECT setval('steps_id_seq', (SELECT MAX(id) FROM steps)); -- inclut l'étape 0 (id=6)
 SELECT setval('dialogues_id_seq', (SELECT MAX(id) FROM dialogues));
 SELECT setval('questions_id_seq', (SELECT MAX(id) FROM questions));

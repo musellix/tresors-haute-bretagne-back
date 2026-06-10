@@ -24,7 +24,7 @@ public class Dialogue {
     private Step step;
 
     @ManyToOne
-    @JoinColumn(name = "korrigan_id", nullable = false)
+    @JoinColumn(name = "korrigan_id", nullable = true)
     private Korrigan korrigan;
 
     @Column(columnDefinition = "TEXT", nullable = false)
